@@ -44,91 +44,91 @@ func NewClient(config *Config, logger golog.ILogger) (*Client, error) {
 	}, nil
 }
 
-func (this *Client) SetLogger(logger golog.ILogger) {
-	this.logger = logger
+func (c *Client) SetLogger(logger golog.ILogger) {
+	c.logger = logger
 }
 
-func (this *Client) Closed() bool {
-	return this.connClosed
+func (c *Client) Closed() bool {
+	return c.connClosed
 }
 
-func (this *Client) Free() {
-	this.db.Close()
-	this.tx = nil
-	this.connClosed = true
+func (c *Client) Free() {
+	c.db.Close()
+	c.tx = nil
+	c.connClosed = true
 }
 
-func (this *Client) Exec(query string, args ...interface{}) (sql.Result, error) {
-	this.log(query, args...)
+func (c *Client) Exec(query string, args ...interface{}) (sql.Result, error) {
+	c.log(query, args...)
 
-	if this.tx != nil {
-		return this.tx.Exec(query, args...)
+	if c.tx != nil {
+		return c.tx.Exec(query, args...)
 	} else {
-		return this.db.Exec(query, args...)
+		return c.db.Exec(query, args...)
 	}
 }
 
-func (this *Client) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	this.log(query, args...)
+func (c *Client) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	c.log(query, args...)
 
-	if this.tx != nil {
-		return this.tx.Query(query, args...)
+	if c.tx != nil {
+		return c.tx.Query(query, args...)
 	} else {
-		return this.db.Query(query, args...)
+		return c.db.Query(query, args...)
 	}
 }
 
-func (this *Client) QueryRow(query string, args ...interface{}) *sql.Row {
-	this.log(query, args...)
+func (c *Client) QueryRow(query string, args ...interface{}) *sql.Row {
+	c.log(query, args...)
 
-	if this.tx != nil {
-		return this.tx.QueryRow(query, args...)
+	if c.tx != nil {
+		return c.tx.QueryRow(query, args...)
 	} else {
-		return this.db.QueryRow(query, args...)
+		return c.db.QueryRow(query, args...)
 	}
 }
 
-func (this *Client) Begin() error {
-	tx, err := this.db.Begin()
+func (c *Client) Begin() error {
+	tx, err := c.db.Begin()
 	if err != nil {
 		return err
 	}
 
-	this.log("BEGIN")
-	this.tx = tx
+	c.log("BEGIN")
+	c.tx = tx
 
 	return nil
 }
 
-func (this *Client) Commit() error {
+func (c *Client) Commit() error {
 	defer func() {
-		this.tx = nil
+		c.tx = nil
 	}()
 
-	if this.tx != nil {
-		this.log("COMMIT")
+	if c.tx != nil {
+		c.log("COMMIT")
 
-		return this.tx.Commit()
+		return c.tx.Commit()
 	}
 
 	return errors.New("Not in trans")
 }
 
-func (this *Client) Rollback() error {
+func (c *Client) Rollback() error {
 	defer func() {
-		this.tx = nil
+		c.tx = nil
 	}()
 
-	if this.tx != nil {
-		this.log("ROLLBACK")
+	if c.tx != nil {
+		c.log("ROLLBACK")
 
-		return this.tx.Rollback()
+		return c.tx.Rollback()
 	}
 
 	return errors.New("Not in trans")
 }
 
-func (this *Client) log(query string, args ...interface{}) {
+func (c *Client) log(query string, args ...interface{}) {
 	query = strings.Replace(query, "?", "%s", -1)
 	vs := make([]interface{}, len(args))
 
@@ -143,5 +143,5 @@ func (this *Client) log(query string, args ...interface{}) {
 	}
 
 	query = fmt.Sprintf(query, vs...)
-	this.logger.Log(this.config.LogLevel, []byte(query))
+	c.logger.Log(c.config.LogLevel, []byte(query))
 }
