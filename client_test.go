@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"github.com/goinbox/golog"
-	"github.com/goinbox/gomisc"
 
 	"database/sql"
 	"strconv"
@@ -25,8 +24,6 @@ func init() {
 }
 
 func TestClientExec(t *testing.T) {
-	gomisc.PrintCallerFuncNameForTest()
-
 	result, err := client.Exec("INSERT INTO demo (name) VALUES (?)", "a")
 	if err != nil {
 		t.Log("exec error: " + err.Error())
@@ -48,8 +45,6 @@ func TestClientExec(t *testing.T) {
 }
 
 func TestClientQuery(t *testing.T) {
-	gomisc.PrintCallerFuncNameForTest()
-
 	rows, err := client.Query("SELECT * FROM demo WHERE id IN (?,?)", 1, 5)
 	if err != nil {
 		t.Log("query error: " + err.Error())
@@ -67,8 +62,6 @@ func TestClientQuery(t *testing.T) {
 }
 
 func TestClientQueryRow(t *testing.T) {
-	gomisc.PrintCallerFuncNameForTest()
-
 	row := client.QueryRow("SELECT * FROM demo WHERE id = ?", 5)
 	item := new(tableDemoRowItem)
 	err := row.Scan(&item.Id, &item.AddTime, &item.EditTime, &item.Name, &item.Status)
@@ -84,8 +77,6 @@ func TestClientQueryRow(t *testing.T) {
 }
 
 func TestClientTrans(t *testing.T) {
-	gomisc.PrintCallerFuncNameForTest()
-
 	client.Begin()
 
 	row := client.QueryRow("SELECT * FROM demo WHERE id = ?", 1)
