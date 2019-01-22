@@ -55,10 +55,10 @@ func TestSQBSelect(t *testing.T) {
 
 func TestSQBWhere(t *testing.T) {
 	sqb.WhereConditionAnd(
-		NewSqlColQueryItem("id", SQL_COND_IN, []int64{1, 2}),
-		NewSqlColQueryItem("add_time", SQL_COND_BETWEEN, []string{"2016-06-23 00:00:00", "2016-06-25 00:00:00"}),
-		NewSqlColQueryItem("edit_time", SQL_COND_EQUAL, "2016-06-24 09:00:00"),
-		NewSqlColQueryItem("name", SQL_COND_LIKE, "%a%"),
+		//NewSqlColQueryItem("id", SQL_COND_IN, []int64{1, 2}),
+		//NewSqlColQueryItem("add_time", SQL_COND_BETWEEN, []string{"2016-06-23 00:00:00", "2016-06-25 00:00:00"}),
+		NewSqlColQueryItem("edit_time", SQL_COND_LESS_EQUAL, "2016-06-24 09:00:00"),
+		//NewSqlColQueryItem("name", SQL_COND_LIKE, "%a%"),
 	)
 	printQueryAndArgs()
 }
