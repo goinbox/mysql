@@ -19,7 +19,7 @@ type tableDemoRowItem struct {
 }
 
 func init() {
-	logger, _ := golog.NewSimpleLogger(golog.NewStdoutWriter(), golog.LEVEL_DEBUG, golog.NewConsoleFormater())
+	logger := golog.NewSimpleLogger(golog.NewConsoleWriter(), golog.NewSimpleFormater())
 
 	config := NewConfig("root", "123", "127.0.0.1", "3306", "gobox-demo")
 	client, _ = NewClient(config, logger)
