@@ -25,7 +25,7 @@ type Client struct {
 
 func NewClient(config *Config, logger golog.ILogger) (*Client, error) {
 	if config.LogLevel == 0 {
-		config.LogLevel = golog.LEVEL_INFO
+		config.LogLevel = golog.LevelInfo
 	}
 
 	db, err := sql.Open("mysql", config.FormatDSN())
