@@ -6,16 +6,16 @@ import (
 )
 
 const (
-	SQL_COND_EQUAL         = "="
-	SQL_COND_NOT_EQUAL     = "!="
-	SQL_COND_LESS          = "<"
-	SQL_COND_LESS_EQUAL    = "<="
-	SQL_COND_GREATER       = ">"
-	SQL_COND_GREATER_EQUAL = ">="
-	SQL_COND_IN            = "in"
-	SQL_COND_NOT_IN        = "not in"
-	SQL_COND_LIKE          = "like"
-	SQL_COND_BETWEEN       = "between"
+	SqlCondEqual        = "="
+	SqlCondNotEqual     = "!="
+	SqlCondLess         = "<"
+	SqlCondLessEqual    = "<="
+	SqlCondGreater      = ">"
+	SqlCondGreaterEqual = ">="
+	SqlCondIn           = "in"
+	SqlCondNotIn        = "not in"
+	SqlCondLike         = "like"
+	SqlCondBetween      = "between"
 )
 
 type SqlColQueryItem struct {
@@ -218,17 +218,17 @@ func (s *SqlQueryBuilder) buildWhereCondition(andOr string, condItems ...*SqlCol
 
 func (s *SqlQueryBuilder) buildCondition(condItem *SqlColQueryItem) {
 	switch condItem.Condition {
-	case SQL_COND_EQUAL, SQL_COND_NOT_EQUAL, SQL_COND_LESS, SQL_COND_LESS_EQUAL, SQL_COND_GREATER, SQL_COND_GREATER_EQUAL:
+	case SqlCondEqual, SqlCondNotEqual, SqlCondLess, SqlCondLessEqual, SqlCondGreater, SqlCondGreaterEqual:
 		s.query += condItem.Name + " " + condItem.Condition + " ?"
 		s.args = append(s.args, condItem.Value)
-	case SQL_COND_IN:
+	case SqlCondIn:
 		s.buildConditionInOrNotIn(condItem, "IN")
-	case SQL_COND_NOT_IN:
+	case SqlCondNotIn:
 		s.buildConditionInOrNotIn(condItem, "NOT IN")
-	case SQL_COND_LIKE:
+	case SqlCondLike:
 		s.query += condItem.Name + " LIKE ?"
 		s.args = append(s.args, condItem.Value)
-	case SQL_COND_BETWEEN:
+	case SqlCondBetween:
 		rev := reflect.ValueOf(condItem.Value)
 		s.query += condItem.Name + " BETWEEN ? AND ?"
 		s.args = append(s.args, rev.Index(0).Interface(), rev.Index(1).Interface())

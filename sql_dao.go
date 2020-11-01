@@ -31,7 +31,7 @@ func (s *SqlDao) Insert(tableName string, colNames []string, colsValues ...[]int
 func (s *SqlDao) DeleteById(tableName string, id int64) *SqlExecResult {
 	sqb := new(SqlQueryBuilder)
 	sqb.Delete(tableName).
-		WhereConditionAnd(NewSqlColQueryItem("id", SQL_COND_EQUAL, id))
+		WhereConditionAnd(NewSqlColQueryItem("id", SqlCondEqual, id))
 
 	return ConvertSqlResultToSqlExecResult(s.Exec(sqb.Query(), sqb.Args()...))
 }
@@ -40,7 +40,7 @@ func (s *SqlDao) UpdateById(tableName string, id int64, setItems ...*SqlColQuery
 	sqb := new(SqlQueryBuilder)
 	sqb.Update(tableName).
 		Set(setItems...).
-		WhereConditionAnd(NewSqlColQueryItem("id", SQL_COND_EQUAL, id))
+		WhereConditionAnd(NewSqlColQueryItem("id", SqlCondEqual, id))
 
 	return ConvertSqlResultToSqlExecResult(s.Exec(sqb.Query(), sqb.Args()...))
 }
@@ -48,7 +48,7 @@ func (s *SqlDao) UpdateById(tableName string, id int64, setItems ...*SqlColQuery
 func (s *SqlDao) SelectById(tableName string, what string, id int64) *sql.Row {
 	sqb := new(SqlQueryBuilder)
 	sqb.Select(what, tableName).
-		WhereConditionAnd(NewSqlColQueryItem("id", SQL_COND_EQUAL, id))
+		WhereConditionAnd(NewSqlColQueryItem("id", SqlCondEqual, id))
 
 	return s.QueryRow(sqb.Query(), sqb.Args()...)
 }
@@ -56,7 +56,7 @@ func (s *SqlDao) SelectById(tableName string, what string, id int64) *sql.Row {
 func (s *SqlDao) SelectByIds(tableName string, what string, orderyBy string, ids ...int64) (*sql.Rows, error) {
 	sqb := new(SqlQueryBuilder)
 	sqb.Select(what, tableName).
-		WhereConditionAnd(NewSqlColQueryItem("id", SQL_COND_IN, ids)).
+		WhereConditionAnd(NewSqlColQueryItem("id", SqlCondIn, ids)).
 		OrderBy(orderyBy)
 
 	return s.Query(sqb.Query(), sqb.Args()...)

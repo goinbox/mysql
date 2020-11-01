@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-const TABLE_NAME = "demo"
+const TableName = "demo"
 
 var sqb SqlQueryBuilder
 
 func TestSQBInsert(t *testing.T) {
-	sqb.Insert(TABLE_NAME, "id", "add_time", "edit_time", "name")
+	sqb.Insert(TableName, "id", "add_time", "edit_time", "name")
 
 	printQueryAndArgs()
 }
@@ -25,13 +25,13 @@ func TestSQBValues(t *testing.T) {
 }
 
 func TestSQBDelete(t *testing.T) {
-	sqb.Delete(TABLE_NAME)
+	sqb.Delete(TableName)
 
 	printQueryAndArgs()
 }
 
 func TestSQBUpdate(t *testing.T) {
-	sqb.Update(TABLE_NAME)
+	sqb.Update(TableName)
 
 	printQueryAndArgs()
 }
@@ -46,19 +46,19 @@ func TestSQBSet(t *testing.T) {
 }
 
 func TestSQBSelect(t *testing.T) {
-	sqb.Select("*", TABLE_NAME)
+	sqb.Select("*", TableName)
 	printQueryAndArgs()
 
-	sqb.Select("name, count(*)", TABLE_NAME)
+	sqb.Select("name, count(*)", TableName)
 	printQueryAndArgs()
 }
 
 func TestSQBWhere(t *testing.T) {
 	sqb.WhereConditionAnd(
-		//NewSqlColQueryItem("id", SQL_COND_IN, []int64{1, 2}),
-		//NewSqlColQueryItem("add_time", SQL_COND_BETWEEN, []string{"2016-06-23 00:00:00", "2016-06-25 00:00:00"}),
-		NewSqlColQueryItem("edit_time", SQL_COND_LESS_EQUAL, "2016-06-24 09:00:00"),
-		//NewSqlColQueryItem("name", SQL_COND_LIKE, "%a%"),
+		//NewSqlColQueryItem("id", SqlCondIn, []int64{1, 2}),
+		//NewSqlColQueryItem("add_time", SqlCondBetween, []string{"2016-06-23 00:00:00", "2016-06-25 00:00:00"}),
+		NewSqlColQueryItem("edit_time", SqlCondLessEqual, "2016-06-24 09:00:00"),
+		//NewSqlColQueryItem("name", SqlCondLike, "%a%"),
 	)
 	printQueryAndArgs()
 }
@@ -70,7 +70,7 @@ func TestSQBGroupBy(t *testing.T) {
 
 func TestSQBHaving(t *testing.T) {
 	sqb.HavingConditionAnd(
-		NewSqlColQueryItem("id", SQL_COND_GREATER, 3),
+		NewSqlColQueryItem("id", SqlCondGreater, 3),
 	)
 	printQueryAndArgs()
 }

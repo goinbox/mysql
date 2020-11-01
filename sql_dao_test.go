@@ -34,9 +34,9 @@ func TestSqlDaoRead(t *testing.T) {
 	}
 
 	condItems := []*SqlColQueryItem{
-		NewSqlColQueryItem("name", SQL_COND_LIKE, "%a%"),
-		NewSqlColQueryItem("id", SQL_COND_BETWEEN, []int64{0, 100}),
-		NewSqlColQueryItem("status", SQL_COND_EQUAL, 0),
+		NewSqlColQueryItem("name", SqlCondLike, "%a%"),
+		NewSqlColQueryItem("id", SqlCondBetween, []int64{0, 100}),
+		NewSqlColQueryItem("status", SqlCondEqual, 0),
 	}
 	rows, _ = dao.SimpleQueryAnd(SQL_TEST_TABLE_NAME, "*", "id desc", 0, 10, condItems...)
 	for rows.Next() {

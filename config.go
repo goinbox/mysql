@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	DEFAULT_CONNECT_TIMEOUT = 10 * time.Second
-	DEFAULT_READ_TIMEOUT    = 10 * time.Second
-	DEFAULT_WRITE_TIMEOUT   = 10 * time.Second
+	DefaultConnectTimeout = 10 * time.Second
+	DefaultReadTimeout    = 10 * time.Second
+	DefaultWriteTimeout   = 10 * time.Second
 )
 
 type Config struct {
@@ -32,9 +32,9 @@ func NewConfig(user, pass, host, port, dbname string) *Config {
 		Addr:                 host + ":" + port,
 		DBName:               dbname,
 		Params:               params,
-		Timeout:              DEFAULT_CONNECT_TIMEOUT,
-		ReadTimeout:          DEFAULT_READ_TIMEOUT,
-		WriteTimeout:         DEFAULT_WRITE_TIMEOUT,
+		Timeout:              DefaultConnectTimeout,
+		ReadTimeout:          DefaultReadTimeout,
+		WriteTimeout:         DefaultWriteTimeout,
 		AllowNativePasswords: true,
 	}
 
