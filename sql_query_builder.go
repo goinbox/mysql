@@ -176,7 +176,14 @@ func (s *SqlQueryBuilder) HavingConditionOr(condItems ...*SqlColQueryItem) *SqlQ
 }
 
 func (s *SqlQueryBuilder) Limit(offset, cnt int64) *SqlQueryBuilder {
-	if cnt <= 0 || offset < 0 {
+	if cnt <= 0 {
+		return s
+	}
+
+	if offset < 0 {
+		s.query += " LIMIT ?"
+		s.args = append(s.args, cnt)
+
 		return s
 	}
 
