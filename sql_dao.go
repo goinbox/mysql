@@ -36,10 +36,10 @@ func (s *SqlDao) DeleteById(tableName string, id int64) *SqlExecResult {
 	return ConvertSqlResultToSqlExecResult(s.Exec(sqb.Query(), sqb.Args()...))
 }
 
-func (s *SqlDao) UpdateById(tableName string, id int64, setItems ...*SqlColQueryItem) *SqlExecResult {
+func (s *SqlDao) UpdateById(tableName string, id int64, updateFields map[string]interface{}) *SqlExecResult {
 	sqb := new(SqlQueryBuilder)
 	sqb.Update(tableName).
-		Set(setItems...).
+		Set(updateFields).
 		WhereConditionAnd(NewSqlColQueryItem("id", SqlCondEqual, id))
 
 	return ConvertSqlResultToSqlExecResult(s.Exec(sqb.Query(), sqb.Args()...))

@@ -86,19 +86,17 @@ func (s *SqlQueryBuilder) Update(tableName string) *SqlQueryBuilder {
 	return s
 }
 
-func (s *SqlQueryBuilder) Set(setItems ...*SqlColQueryItem) *SqlQueryBuilder {
-	l := len(setItems) - 1
-	if l == -1 {
+func (s *SqlQueryBuilder) Set(updateFields map[string]interface{}) *SqlQueryBuilder {
+	if updateFields == nil || len(updateFields) == 0 {
 		return s
 	}
 
 	s.query += " SET "
-	for i := 0; i < l; i++ {
-		s.query += setItems[i].Name + " = ?, "
-		s.args = append(s.args, setItems[i].Value)
+	for name, value := range updateFields {
+		s.query += name + " = ?, "
+		s.args = append(s.args, value)
 	}
-	s.query += setItems[l].Name + " = ? "
-	s.args = append(s.args, setItems[l].Value)
+	s.query = s.query[0 : len(s.query)-2]
 
 	return s
 }

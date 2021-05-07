@@ -69,11 +69,11 @@ func TestSqlDaoWrite(t *testing.T) {
 	t.Log(result)
 
 	id := result.LastInsertId
-	setItems := []*SqlColQueryItem{
-		NewSqlColQueryItem("name", "", "abc"),
-		NewSqlColQueryItem("edit_time", "", ts),
+	updateFields := map[string]interface{}{
+		"name":      "abc",
+		"edit_time": ts,
 	}
-	result = dao.UpdateById(SQL_TEST_TABLE_NAME, id, setItems...)
+	result = dao.UpdateById(SQL_TEST_TABLE_NAME, id, updateFields)
 	t.Log(result)
 
 	result = dao.DeleteById(SQL_TEST_TABLE_NAME, id)

@@ -37,10 +37,10 @@ func TestSQBUpdate(t *testing.T) {
 }
 
 func TestSQBSet(t *testing.T) {
-	sqb.Set(
-		NewSqlColQueryItem("name", "", "d"),
-		NewSqlColQueryItem("edit_time", "", "2016-06-24 09:00:00"),
-	)
+	sqb.Set(map[string]interface{}{
+		"name":      "d",
+		"edit_time": "2016-06-24 09:00:00",
+	})
 
 	printQueryAndArgs()
 }
