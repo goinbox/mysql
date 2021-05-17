@@ -11,7 +11,7 @@ const (
 	SQL_TEST_TABLE_NAME = "demo"
 )
 
-type sqlTestEntity struct {
+type demoEntity struct {
 	Id       int64
 	AddTime  string
 	EditTime string
@@ -19,28 +19,28 @@ type sqlTestEntity struct {
 	Status   int
 }
 
-func TestSqlDaoRead(t *testing.T) {
-	dao := &SqlDao{client}
-	entity := new(sqlTestEntity)
+func TestDaoRead(t *testing.T) {
+	dao := &Dao{client}
+	entity := new(demoEntity)
 
 	row := dao.SelectById(SQL_TEST_TABLE_NAME, "*", 1)
-	row.Scan(&entity.Id, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
+	_ = row.Scan(&entity.Id, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
 	t.Log(entity)
 
-	rows, _ := dao.SelectByIds(SQL_TEST_TABLE_NAME, "*", "id desc", 1)
-	for rows.Next() {
-		rows.Scan(&entity.Id, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
-		t.Log("entity", entity)
-	}
-
 	condItems := []*SqlColQueryItem{
-		NewSqlColQueryItem("name", SqlCondLike, "%a%"),
-		NewSqlColQueryItem("id", SqlCondBetween, []int64{0, 100}),
-		NewSqlColQueryItem("status", SqlCondEqual, 0),
+		{"name", SqlCondLike, "%a%"},
+		{"id", SqlCondBetween, []int64{0, 100}},
+		{"status", SqlCondEqual, 0},
 	}
-	rows, _ = dao.SimpleQueryAnd(SQL_TEST_TABLE_NAME, "*", "id desc", 0, 10, condItems...)
+	params := &SqlQueryParams{
+		CondItems: condItems,
+		OrderBy:   "id desc",
+		Offset:    0,
+		Cnt:       10,
+	}
+	rows, _ := dao.SimpleQueryAnd(SQL_TEST_TABLE_NAME, "*", params)
 	for rows.Next() {
-		rows.Scan(&entity.Id, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
+		_ = rows.Scan(&entity.Id, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
 		t.Log(entity)
 	}
 
@@ -48,8 +48,8 @@ func TestSqlDaoRead(t *testing.T) {
 	t.Log(total)
 }
 
-func TestSqlDaoWrite(t *testing.T) {
-	dao := &SqlDao{client}
+func TestDaoWrite(t *testing.T) {
+	dao := &Dao{client}
 
 	var colNames = []string{"id", "add_time", "edit_time", "name", "status"}
 	var colsValues [][]interface{}
@@ -67,6 +67,11 @@ func TestSqlDaoWrite(t *testing.T) {
 	}
 	result := dao.Insert(SQL_TEST_TABLE_NAME, colNames, colsValues...)
 	t.Log(result)
+	if result.Err != nil {
+		if DuplicateError(result.Err) {
+			t.Log("DuplicateError")
+		}
+	}
 
 	id := result.LastInsertId
 	updateFields := map[string]interface{}{

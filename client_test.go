@@ -21,7 +21,7 @@ type tableDemoRowItem struct {
 func init() {
 	logger := golog.NewSimpleLogger(golog.NewConsoleWriter(), golog.NewSimpleFormater())
 
-	config := NewConfig("root", "123", "127.0.0.1", "3306", "gobox-demo")
+	config := NewDefaultConfig("root", "123", "127.0.0.1", "3306", "gobox-demo")
 	client, _ = NewClient(config, logger)
 
 	client.Exec("DELETE FROM demo")

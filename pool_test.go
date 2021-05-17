@@ -21,7 +21,7 @@ func TestPool(t *testing.T) {
 }
 
 func newMysqlTestClient() (*Client, error) {
-	config := NewConfig("root", "123", "127.0.0.1", "3306", "gobox-demo")
+	config := NewDefaultConfig("root", "123", "127.0.0.1", "3306", "gobox-demo")
 
 	return NewClient(config, nil)
 }

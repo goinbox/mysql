@@ -71,7 +71,7 @@ func (c *Client) Closed() bool {
 }
 
 func (c *Client) Free() {
-	c.db.Close()
+	_ = c.db.Close()
 	c.tx = nil
 	c.connClosed = true
 }

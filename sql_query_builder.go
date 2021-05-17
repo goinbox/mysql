@@ -24,14 +24,6 @@ type SqlColQueryItem struct {
 	Value     interface{}
 }
 
-func NewSqlColQueryItem(name, condition string, value interface{}) *SqlColQueryItem {
-	return &SqlColQueryItem{
-		Name:      name,
-		Condition: condition,
-		Value:     value,
-	}
-}
-
 type SqlQueryBuilder struct {
 	query string
 	args  []interface{}

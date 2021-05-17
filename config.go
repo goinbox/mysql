@@ -20,7 +20,7 @@ type Config struct {
 	LogLevel int
 }
 
-func NewConfig(user, pass, host, port, dbname string) *Config {
+func NewDefaultConfig(user, pass, host, port, dbname string) *Config {
 	params := map[string]string{
 		"interpolateParams": "true",
 	}
