@@ -68,7 +68,7 @@ func ReflectEntityScanDests(rev reflect.Value) []interface{} {
 	return dests
 }
 
-func ReflectQueryRowsToEntityList(rows *sql.Rows, ret reflect.Type, entitiesPtr interface{}) error {
+func ReflectQueryRowsToEntities(rows *sql.Rows, ret reflect.Type, entitiesPtr interface{}) error {
 	rlistv := reflect.ValueOf(entitiesPtr).Elem()
 
 	for rows.Next() {
@@ -115,6 +115,6 @@ func (ed *EntityDao) SimpleQueryEntitiesAnd(tableName string, params *SqlQueryPa
 		return err
 	}
 
-	err = ReflectQueryRowsToEntityList(rows, ret, entitiesPtr)
+	err = ReflectQueryRowsToEntities(rows, ret, entitiesPtr)
 	return err
 }
