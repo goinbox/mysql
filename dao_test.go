@@ -11,14 +11,6 @@ const (
 	SQL_TEST_TABLE_NAME = "demo"
 )
 
-type demoEntity struct {
-	Id       int64
-	AddTime  string
-	EditTime string
-	Name     string
-	Status   int
-}
-
 func TestDaoRead(t *testing.T) {
 	dao := &Dao{client}
 	entity := new(demoEntity)
