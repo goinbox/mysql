@@ -85,7 +85,7 @@ func ReflectQueryRowsToEntities(rows *sql.Rows, ret reflect.Type, entitiesPtr in
 }
 
 type EntityDao struct {
-	*Dao
+	Dao
 }
 
 func (ed *EntityDao) InsertEntities(tableName string, entities ...interface{}) error {

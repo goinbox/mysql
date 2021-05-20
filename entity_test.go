@@ -56,5 +56,5 @@ func TestSimpleQueryEntitiesAnd(t *testing.T) {
 }
 
 func entityDao() *EntityDao {
-	return &EntityDao{&Dao{client}}
+	return &EntityDao{Dao{client}}
 }
