@@ -1,79 +1,60 @@
 package mysql
 
 import (
-	"github.com/goinbox/golog"
-	"github.com/goinbox/gomisc"
-
 	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
 )
 
-type Client struct {
+type dbItem struct {
 	config *Config
+	db     *sql.DB
+}
 
+var globalDBMap = map[string]*dbItem{}
+
+func AddGlobalDB(key string, config *Config) error {
+	db, err := sql.Open("mysql", config.FormatDSN())
+	if err != nil {
+		return nil
+	}
+
+	globalDBMap[key] = &dbItem{
+		config: config,
+		db:     db,
+	}
+
+	return nil
+}
+
+type logFunc func(query []byte)
+
+type Client struct {
 	db *sql.DB
 	tx *sql.Tx
 
-	connClosed bool
-
-	logger    golog.ILogger
-	traceId   []byte
-	logPrefix []byte
+	lf logFunc
 }
 
-func NewClient(config *Config, logger golog.ILogger) (*Client, error) {
-	if config.LogLevel == 0 {
-		config.LogLevel = golog.LevelInfo
-	}
-
-	db, err := sql.Open("mysql", config.FormatDSN())
-	if err != nil {
-		return nil, err
-	}
-
-	if logger == nil {
-		logger = new(golog.NoopLogger)
+func NewClient(key string) (*Client, error) {
+	item, ok := globalDBMap[key]
+	if !ok {
+		return nil, errors.New("DB " + key + " not exist")
 	}
 
 	return &Client{
-		config: config,
-
-		db: db,
+		db: item.db,
 		tx: nil,
 
-		logger:  logger,
-		traceId: []byte("-"),
-		logPrefix: []byte("[MysqlClient " +
-			config.Addr +
-			"]\t"),
+		lf: nil,
 	}, nil
 }
 
-func (c *Client) SetLogger(logger golog.ILogger) *Client {
-	if logger == nil {
-		logger = new(golog.NoopLogger)
-	}
-	c.logger = logger
+func (c *Client) SetLogFunc(lf logFunc) *Client {
+	c.lf = lf
 
 	return c
-}
-
-func (c *Client) SetTraceId(traceId []byte) *Client {
-	c.traceId = traceId
-
-	return c
-}
-
-func (c *Client) Closed() bool {
-	return c.connClosed
-}
-
-func (c *Client) Free() {
-	_ = c.db.Close()
-	c.tx = nil
-	c.connClosed = true
 }
 
 func (c *Client) Exec(query string, args ...interface{}) (sql.Result, error) {
@@ -147,6 +128,10 @@ func (c *Client) Rollback() error {
 }
 
 func (c *Client) log(query string, args ...interface{}) {
+	if c.lf == nil {
+		return
+	}
+
 	query = strings.Replace(query, "?", "%s", -1)
 	vs := make([]interface{}, len(args))
 
@@ -160,6 +145,5 @@ func (c *Client) log(query string, args ...interface{}) {
 		}
 	}
 
-	query = fmt.Sprintf(query, vs...)
-	_ = c.logger.Log(c.config.LogLevel, gomisc.AppendBytes(c.traceId, []byte("\t"), c.logPrefix, []byte(query)))
+	c.lf([]byte(fmt.Sprintf(query, vs...)))
 }

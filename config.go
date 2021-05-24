@@ -1,11 +1,9 @@
 package mysql
 
 import (
-	"github.com/go-sql-driver/mysql"
-
-	"github.com/goinbox/golog"
-
 	"time"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 const (
@@ -16,8 +14,6 @@ const (
 
 type Config struct {
 	*mysql.Config
-
-	LogLevel int
 }
 
 func NewDefaultConfig(user, pass, host, port, dbname string) *Config {
@@ -40,7 +36,5 @@ func NewDefaultConfig(user, pass, host, port, dbname string) *Config {
 
 	return &Config{
 		Config: config,
-
-		LogLevel: golog.LevelInfo,
 	}
 }
