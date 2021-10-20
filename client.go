@@ -38,7 +38,7 @@ type Client struct {
 	logger golog.Logger
 }
 
-func ClientFromPool(key string, logger golog.Logger) (*Client, error) {
+func NewClientFromPool(key string, logger golog.Logger) (*Client, error) {
 	item, ok := dbPool[key]
 	if !ok {
 		return nil, errors.New("DB " + key + " not exist")
