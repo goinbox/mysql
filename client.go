@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/goinbox/golog"
 )
 
 type dbItem struct {
@@ -12,15 +14,15 @@ type dbItem struct {
 	db     *sql.DB
 }
 
-var globalDBMap = map[string]*dbItem{}
+var dbPool = map[string]*dbItem{}
 
-func AddGlobalDB(key string, config *Config) error {
+func RegisterDB(key string, config *Config) error {
 	db, err := sql.Open("mysql", config.FormatDSN())
 	if err != nil {
 		return nil
 	}
 
-	globalDBMap[key] = &dbItem{
+	dbPool[key] = &dbItem{
 		config: config,
 		db:     db,
 	}
@@ -28,33 +30,43 @@ func AddGlobalDB(key string, config *Config) error {
 	return nil
 }
 
-type logFunc func(query []byte)
-
 type Client struct {
 	db *sql.DB
 	tx *sql.Tx
 
-	lf logFunc
+	config *Config
+	logger golog.Logger
 }
 
-func NewClient(key string) (*Client, error) {
-	item, ok := globalDBMap[key]
+func ClientFromPool(key string, logger golog.Logger) (*Client, error) {
+	item, ok := dbPool[key]
 	if !ok {
 		return nil, errors.New("DB " + key + " not exist")
 	}
 
-	return &Client{
-		db: item.db,
-		tx: nil,
-
-		lf: nil,
-	}, nil
+	return newClient(item.db, item.config, logger), nil
 }
 
-func (c *Client) SetLogFunc(lf logFunc) *Client {
-	c.lf = lf
+func NewClient(config *Config, logger golog.Logger) (*Client, error) {
+	db, err := sql.Open("mysql", config.FormatDSN())
+	if err != nil {
+		return nil, err
+	}
 
-	return c
+	return newClient(db, config, logger), nil
+}
+
+func newClient(db *sql.DB, config *Config, logger golog.Logger) *Client {
+	return &Client{
+		db: db,
+		tx: nil,
+
+		config: config,
+		logger: logger.With(&golog.Field{
+			Key:   config.LogFieldKeyAddr,
+			Value: config.Addr,
+		}),
+	}
 }
 
 func (c *Client) Exec(query string, args ...interface{}) (sql.Result, error) {
@@ -128,10 +140,6 @@ func (c *Client) Rollback() error {
 }
 
 func (c *Client) log(query string, args ...interface{}) {
-	if c.lf == nil {
-		return
-	}
-
 	query = strings.Replace(query, "?", "%s", -1)
 	vs := make([]interface{}, len(args))
 
@@ -145,5 +153,8 @@ func (c *Client) log(query string, args ...interface{}) {
 		}
 	}
 
-	c.lf([]byte(fmt.Sprintf(query, vs...)))
+	c.logger.Info("run sql", &golog.Field{
+		Key:   c.config.LogFieldKeySql,
+		Value: fmt.Sprintf(query, vs...),
+	})
 }

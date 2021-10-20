@@ -10,10 +10,16 @@ const (
 	DefaultConnectTimeout = 10 * time.Second
 	DefaultReadTimeout    = 10 * time.Second
 	DefaultWriteTimeout   = 10 * time.Second
+
+	DefaultLogFieldKeyAddr = "mysql_addr"
+	DefaultLogFieldKeySql  = "sql"
 )
 
 type Config struct {
 	*mysql.Config
+
+	LogFieldKeyAddr string
+	LogFieldKeySql  string
 }
 
 func NewDefaultConfig(user, pass, host, port, dbname string) *Config {
@@ -36,5 +42,8 @@ func NewDefaultConfig(user, pass, host, port, dbname string) *Config {
 
 	return &Config{
 		Config: config,
+
+		LogFieldKeyAddr: DefaultLogFieldKeyAddr,
+		LogFieldKeySql:  DefaultLogFieldKeySql,
 	}
 }

@@ -19,15 +19,13 @@ type tableDemoRowItem struct {
 }
 
 func init() {
-	logger := golog.NewSimpleLogger(golog.NewConsoleWriter(), golog.NewSimpleFormater())
+	w, _ := golog.NewFileWriter("/dev/stdout", 0)
+	logger := golog.NewSimpleLogger(w, golog.NewSimpleFormater())
 
 	config := NewDefaultConfig("root", "123", "127.0.0.1", "3306", "gobox-demo")
-	key := "test"
-	_ = AddGlobalDB(key, config)
-	client, _ = NewClient(key)
-	client.SetLogFunc(logger.Info)
+	client, _ = NewClient(config, logger)
 
-	//client.Exec("DELETE FROM demo")
+	client.Exec("DELETE FROM demo")
 }
 
 func TestClientExec(t *testing.T) {
