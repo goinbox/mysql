@@ -11,7 +11,7 @@ const (
 	DefaultReadTimeout    = 10 * time.Second
 	DefaultWriteTimeout   = 10 * time.Second
 
-	DefaultLogFieldKeyAddr = "mysql_addr"
+	DefaultLogFieldKeyAddr = "mysql"
 	DefaultLogFieldKeySql  = "sql"
 )
 
