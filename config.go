@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -22,7 +23,7 @@ type Config struct {
 	LogFieldKeySql  string
 }
 
-func NewDefaultConfig(user, pass, host, port, dbname string) *Config {
+func NewDefaultConfig(user, pass, host, dbname string, port int) *Config {
 	params := map[string]string{
 		"interpolateParams": "true",
 	}
@@ -31,7 +32,7 @@ func NewDefaultConfig(user, pass, host, port, dbname string) *Config {
 		User:                 user,
 		Passwd:               pass,
 		Net:                  "tcp",
-		Addr:                 host + ":" + port,
+		Addr:                 fmt.Sprintf("%s:%d", host, port),
 		DBName:               dbname,
 		Params:               params,
 		Timeout:              DefaultConnectTimeout,

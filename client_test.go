@@ -22,7 +22,7 @@ func init() {
 	w, _ := golog.NewFileWriter("/dev/stdout", 0)
 	logger := golog.NewSimpleLogger(w, golog.NewSimpleFormater())
 
-	config := NewDefaultConfig("root", "123", "127.0.0.1", "3306", "gobox-demo")
+	config := NewDefaultConfig("root", "123", "127.0.0.1", "gobox-demo", 3306)
 	client, _ = NewClient(config, logger)
 
 	client.Exec("DELETE FROM demo")
