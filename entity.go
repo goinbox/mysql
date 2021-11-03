@@ -10,14 +10,21 @@ const (
 	EntityMysqlFieldTag = "mysql"
 )
 
-func ReflectColNames(ret reflect.Type) []string {
+func ReflectColNamesByType(ret reflect.Type) []string {
 	var cns []string
 
 	for i := 0; i < ret.NumField(); i++ {
 		retf := ret.Field(i)
-		if retf.Type.Kind() == reflect.Struct {
-			cns = ReflectColNames(retf.Type)
-			continue
+		ftype := retf.Type
+		if ftype.Kind() == reflect.Ptr {
+			ftype = ftype.Elem()
+		}
+
+		if ftype.Kind() == reflect.Struct {
+			if ftype.String() != "time.Time" {
+				cns = append(cns, ReflectColNamesByType(ftype)...)
+				continue
+			}
 		}
 
 		if name, ok := retf.Tag.Lookup(EntityMysqlFieldTag); ok {
@@ -28,15 +35,51 @@ func ReflectColNames(ret reflect.Type) []string {
 	return cns
 }
 
-func ReflectColValues(rev reflect.Value) []interface{} {
+func ReflectColNamesByValue(rev reflect.Value, filterNil bool) []string {
+	var cns []string
+
+	ret := rev.Type()
+	for i := 0; i < rev.NumField(); i++ {
+		revf := rev.Field(i)
+		if revf.Kind() == reflect.Ptr {
+			if filterNil && revf.IsNil() {
+				continue
+			}
+			revf = revf.Elem()
+		}
+
+		if revf.Kind() == reflect.Struct {
+			if revf.Type().String() != "time.Time" {
+				cns = append(cns, ReflectColNamesByValue(revf, filterNil)...)
+				continue
+			}
+		}
+
+		if name, ok := ret.Field(i).Tag.Lookup(EntityMysqlFieldTag); ok {
+			cns = append(cns, name)
+		}
+	}
+
+	return cns
+}
+
+func ReflectColValues(rev reflect.Value, filterNil bool) []interface{} {
 	var colValues []interface{}
 
 	ret := rev.Type()
 	for i := 0; i < rev.NumField(); i++ {
 		revf := rev.Field(i)
+		if revf.Kind() == reflect.Ptr {
+			if filterNil && revf.IsNil() {
+				continue
+			}
+			revf = revf.Elem()
+		}
 		if revf.Kind() == reflect.Struct {
-			colValues = ReflectColValues(revf)
-			continue
+			if revf.Type().String() != "time.Time" {
+				colValues = append(colValues, ReflectColValues(revf, filterNil)...)
+				continue
+			}
 		}
 
 		_, ok := ret.Field(i).Tag.Lookup(EntityMysqlFieldTag)
@@ -89,10 +132,10 @@ type EntityDao struct {
 }
 
 func (ed *EntityDao) InsertEntities(tableName string, entities ...interface{}) error {
-	colNames := ReflectColNames(reflect.TypeOf(entities[0]).Elem())
+	colNames := ReflectColNamesByValue(reflect.ValueOf(entities[0]).Elem(), true)
 	colsValues := make([][]interface{}, len(entities))
 	for i, item := range entities {
-		colsValues[i] = ReflectColValues(reflect.ValueOf(item).Elem())
+		colsValues[i] = ReflectColValues(reflect.ValueOf(item).Elem(), true)
 	}
 
 	result := ed.Insert(tableName, colNames, colsValues...)
@@ -100,7 +143,7 @@ func (ed *EntityDao) InsertEntities(tableName string, entities ...interface{}) e
 }
 
 func (ed *EntityDao) SelectEntityById(tableName string, id int64, entity interface{}) error {
-	colNames := ReflectColNames(reflect.TypeOf(entity).Elem())
+	colNames := ReflectColNamesByValue(reflect.ValueOf(entity).Elem(), false)
 	row := ed.SelectById(tableName, strings.Join(colNames, ","), id)
 	dests := ReflectEntityScanDests(reflect.ValueOf(entity).Elem())
 
@@ -109,7 +152,7 @@ func (ed *EntityDao) SelectEntityById(tableName string, id int64, entity interfa
 
 func (ed *EntityDao) SimpleQueryEntitiesAnd(tableName string, params *SqlQueryParams, entitiesPtr interface{}) error {
 	ret := reflect.TypeOf(entitiesPtr).Elem().Elem().Elem()
-	colNames := ReflectColNames(ret)
+	colNames := ReflectColNamesByType(ret)
 	rows, err := ed.SimpleQueryAnd(tableName, strings.Join(colNames, ","), params)
 	if err != nil {
 		return err

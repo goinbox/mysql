@@ -39,6 +39,8 @@ func NewDefaultConfig(user, pass, host, dbname string, port int) *Config {
 		ReadTimeout:          DefaultReadTimeout,
 		WriteTimeout:         DefaultWriteTimeout,
 		AllowNativePasswords: true,
+		ParseTime:            true,
+		Loc:                  time.Local,
 	}
 
 	return &Config{

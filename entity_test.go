@@ -3,27 +3,27 @@ package mysql
 import (
 	"strconv"
 	"testing"
+	"time"
 )
 
 type demoEntity struct {
-	Id       int64  `mysql:"id"`
-	AddTime  string `mysql:"add_time"`
-	EditTime string `mysql:"edit_time"`
+	ID       *int64     `mysql:"id"`
+	AddTime  *time.Time `mysql:"add_time"`
+	EditTime *time.Time `mysql:"edit_time"`
 
 	Name   string `mysql:"name"`
 	Status int    `mysql:"status"`
 }
 
 func TestInsertEntities(t *testing.T) {
-	cnt := 3
+	cnt := 1
 	entities := make([]interface{}, cnt)
+	now := time.Now()
 	for i := 0; i < cnt; i++ {
 		entities[i] = &demoEntity{
-			Id:       100 + int64(i),
-			AddTime:  "2021-05-19 11:25:03",
-			EditTime: "2021-05-19 11:25:03",
-			Name:     "demo" + strconv.Itoa(i),
-			Status:   0,
+			AddTime: &now,
+			Name:    "demo" + strconv.Itoa(i),
+			Status:  0,
 		}
 	}
 
@@ -34,7 +34,7 @@ func TestInsertEntities(t *testing.T) {
 func TestSelectEntityById(t *testing.T) {
 	entity := new(demoEntity)
 	err := entityDao().SelectEntityById("demo", 100, entity)
-	t.Log(err, entity, NoRowsError(err))
+	t.Log(err, entity, NoRowsError(err), *entity.ID, *entity.AddTime, *entity.EditTime)
 }
 
 func TestSimpleQueryEntitiesAnd(t *testing.T) {
@@ -51,7 +51,7 @@ func TestSimpleQueryEntitiesAnd(t *testing.T) {
 	err := entityDao().SimpleQueryEntitiesAnd("demo", params, &entityList)
 	t.Log(err, NoRowsError(err))
 	for i, entity := range entityList {
-		t.Log(i, entity)
+		t.Log(i, entity, *entity.ID, *entity.AddTime, *entity.EditTime)
 	}
 }
 

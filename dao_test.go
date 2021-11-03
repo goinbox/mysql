@@ -16,7 +16,7 @@ func TestDaoRead(t *testing.T) {
 	entity := new(demoEntity)
 
 	row := dao.SelectById(SQL_TEST_TABLE_NAME, "*", 1)
-	_ = row.Scan(&entity.Id, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
+	_ = row.Scan(&entity.ID, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
 	t.Log(entity)
 
 	condItems := []*SqlColQueryItem{
@@ -32,7 +32,7 @@ func TestDaoRead(t *testing.T) {
 	}
 	rows, _ := dao.SimpleQueryAnd(SQL_TEST_TABLE_NAME, "*", params)
 	for rows.Next() {
-		_ = rows.Scan(&entity.Id, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
+		_ = rows.Scan(&entity.ID, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
 		t.Log(entity)
 	}
 
