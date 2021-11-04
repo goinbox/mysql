@@ -25,7 +25,7 @@ func init() {
 	config := NewDefaultConfig("root", "123", "127.0.0.1", "gobox-demo", 3306)
 	client, _ = NewClient(config, logger)
 
-	//client.Exec("DELETE FROM demo")
+	client.Exec("DELETE FROM demo")
 }
 
 func TestClientExec(t *testing.T) {

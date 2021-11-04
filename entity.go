@@ -131,29 +131,28 @@ type EntityDao struct {
 	Dao
 }
 
-func (ed *EntityDao) InsertEntities(tableName string, entities ...interface{}) error {
+func (d *EntityDao) InsertEntities(tableName string, entities ...interface{}) *SqlExecResult {
 	colNames := ReflectColNamesByValue(reflect.ValueOf(entities[0]).Elem(), true)
 	colsValues := make([][]interface{}, len(entities))
 	for i, item := range entities {
 		colsValues[i] = ReflectColValues(reflect.ValueOf(item).Elem(), true)
 	}
 
-	result := ed.Insert(tableName, colNames, colsValues...)
-	return result.Err
+	return d.Insert(tableName, colNames, colsValues...)
 }
 
-func (ed *EntityDao) SelectEntityById(tableName string, id int64, entity interface{}) error {
+func (d *EntityDao) SelectEntityById(tableName string, id int64, entity interface{}) error {
 	colNames := ReflectColNamesByValue(reflect.ValueOf(entity).Elem(), false)
-	row := ed.SelectById(tableName, strings.Join(colNames, ","), id)
+	row := d.SelectById(tableName, strings.Join(colNames, ","), id)
 	dests := ReflectEntityScanDests(reflect.ValueOf(entity).Elem())
 
 	return row.Scan(dests...)
 }
 
-func (ed *EntityDao) SimpleQueryEntitiesAnd(tableName string, params *SqlQueryParams, entitiesPtr interface{}) error {
+func (d *EntityDao) SimpleQueryEntitiesAnd(tableName string, params *SqlQueryParams, entitiesPtr interface{}) error {
 	ret := reflect.TypeOf(entitiesPtr).Elem().Elem().Elem()
 	colNames := ReflectColNamesByType(ret)
-	rows, err := ed.SimpleQueryAnd(tableName, strings.Join(colNames, ","), params)
+	rows, err := d.SimpleQueryAnd(tableName, strings.Join(colNames, ","), params)
 	if err != nil {
 		return err
 	}

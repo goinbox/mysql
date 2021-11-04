@@ -70,9 +70,9 @@ func TestDaoWrite(t *testing.T) {
 		"name":      "abc",
 		"edit_time": ts,
 	}
-	result = dao.UpdateById(SQL_TEST_TABLE_NAME, id, updateFields)
+	result = dao.UpdateByIds(SQL_TEST_TABLE_NAME, updateFields, id)
 	t.Log(result)
 
-	result = dao.DeleteById(SQL_TEST_TABLE_NAME, id)
+	result = dao.DeleteByIds(SQL_TEST_TABLE_NAME, id)
 	t.Log(result)
 }

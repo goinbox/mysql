@@ -30,19 +30,28 @@ func (d *Dao) Insert(tableName string, colNames []string, colsValues ...[]interf
 	return ConvertSqlResultToSqlExecResult(d.Exec(sqb.Query(), sqb.Args()...))
 }
 
-func (d *Dao) DeleteById(tableName string, id int64) *SqlExecResult {
+func (d *Dao) DeleteByIds(tableName string, ids ...int64) *SqlExecResult {
 	sqb := new(SqlQueryBuilder)
-	sqb.Delete(tableName).
-		WhereConditionAnd(&SqlColQueryItem{"id", SqlCondEqual, id})
+
+	sqb.Delete(tableName)
+	if len(ids) == 1 {
+		sqb.WhereConditionAnd(&SqlColQueryItem{"id", SqlCondEqual, ids[0]})
+	} else {
+		sqb.WhereConditionAnd(&SqlColQueryItem{"id", SqlCondIn, ids})
+	}
 
 	return ConvertSqlResultToSqlExecResult(d.Exec(sqb.Query(), sqb.Args()...))
 }
 
-func (d *Dao) UpdateById(tableName string, id int64, updateFields map[string]interface{}) *SqlExecResult {
+func (d *Dao) UpdateByIds(tableName string, updateFields map[string]interface{}, ids ...int64) *SqlExecResult {
 	sqb := new(SqlQueryBuilder)
-	sqb.Update(tableName).
-		Set(updateFields).
-		WhereConditionAnd(&SqlColQueryItem{"id", SqlCondEqual, id})
+
+	sqb.Update(tableName).Set(updateFields)
+	if len(ids) == 1 {
+		sqb.WhereConditionAnd(&SqlColQueryItem{"id", SqlCondEqual, ids[0]})
+	} else {
+		sqb.WhereConditionAnd(&SqlColQueryItem{"id", SqlCondIn, ids})
+	}
 
 	return ConvertSqlResultToSqlExecResult(d.Exec(sqb.Query(), sqb.Args()...))
 }
