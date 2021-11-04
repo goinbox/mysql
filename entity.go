@@ -108,7 +108,6 @@ func ReflectColValues(rev reflect.Value, filterNil bool) []interface{} {
 func ReflectEntityScanDests(rev reflect.Value) []interface{} {
 	var dests []interface{}
 
-	ret := rev.Type()
 	for i := 0; i < rev.NumField(); i++ {
 		revf := rev.Field(i)
 		if revf.Kind() == reflect.Struct {
@@ -116,10 +115,7 @@ func ReflectEntityScanDests(rev reflect.Value) []interface{} {
 			continue
 		}
 
-		_, ok := ret.Field(i).Tag.Lookup(EntityTagColumn)
-		if ok {
-			dests = append(dests, revf.Addr().Interface())
-		}
+		dests = append(dests, revf.Addr().Interface())
 	}
 
 	return dests

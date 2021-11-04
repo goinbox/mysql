@@ -33,7 +33,7 @@ func TestInsertEntities(t *testing.T) {
 
 func TestSelectEntityByID(t *testing.T) {
 	entity := new(demoEntity)
-	err := entityDao().SelectEntityByID("demo", 100, entity)
+	err := entityDao().SelectEntityByID("demo", 159, entity)
 	t.Log(err, entity, NoRowsError(err))
 	if err == nil {
 		t.Log(*entity.ID, *entity.AddTime, *entity.EditTime)
