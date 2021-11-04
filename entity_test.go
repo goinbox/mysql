@@ -7,16 +7,16 @@ import (
 )
 
 type demoEntity struct {
-	ID       *int64     `mysql:"id"`
-	AddTime  *time.Time `mysql:"add_time"`
-	EditTime *time.Time `mysql:"edit_time"`
+	ID       *int64 `column:"id"`
+	AddTime  *time.Time
+	EditTime *time.Time
 
-	Name   string `mysql:"name"`
-	Status int    `mysql:"status"`
+	Name   string
+	Status int
 }
 
 func TestInsertEntities(t *testing.T) {
-	cnt := 1
+	cnt := 3
 	entities := make([]interface{}, cnt)
 	now := time.Now()
 	for i := 0; i < cnt; i++ {

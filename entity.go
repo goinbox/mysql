@@ -3,12 +3,33 @@ package mysql
 import (
 	"database/sql"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
 const (
-	EntityMysqlFieldTag = "mysql"
+	EntityTagColumn = "column"
+	EntityColumnSep = "_"
 )
+
+var (
+	entityFieldRegex = regexp.MustCompile("([A-Z][a-z0-9]*)")
+)
+
+func columnByField(field *reflect.StructField) string {
+	name, ok := field.Tag.Lookup(EntityTagColumn)
+	if ok {
+		return name
+	}
+
+	matches := entityFieldRegex.FindAllStringSubmatch(field.Name, -1)
+	elems := make([]string, len(matches))
+	for i, match := range matches {
+		elems[i] = strings.ToLower(match[1])
+	}
+
+	return strings.Join(elems, EntityColumnSep)
+}
 
 func ReflectColNamesByType(ret reflect.Type) []string {
 	var cns []string
@@ -27,9 +48,7 @@ func ReflectColNamesByType(ret reflect.Type) []string {
 			}
 		}
 
-		if name, ok := retf.Tag.Lookup(EntityMysqlFieldTag); ok {
-			cns = append(cns, name)
-		}
+		cns = append(cns, columnByField(&retf))
 	}
 
 	return cns
@@ -55,9 +74,8 @@ func ReflectColNamesByValue(rev reflect.Value, filterNil bool) []string {
 			}
 		}
 
-		if name, ok := ret.Field(i).Tag.Lookup(EntityMysqlFieldTag); ok {
-			cns = append(cns, name)
-		}
+		retf := ret.Field(i)
+		cns = append(cns, columnByField(&retf))
 	}
 
 	return cns
@@ -66,7 +84,6 @@ func ReflectColNamesByValue(rev reflect.Value, filterNil bool) []string {
 func ReflectColValues(rev reflect.Value, filterNil bool) []interface{} {
 	var colValues []interface{}
 
-	ret := rev.Type()
 	for i := 0; i < rev.NumField(); i++ {
 		revf := rev.Field(i)
 		if revf.Kind() == reflect.Ptr {
@@ -82,10 +99,7 @@ func ReflectColValues(rev reflect.Value, filterNil bool) []interface{} {
 			}
 		}
 
-		_, ok := ret.Field(i).Tag.Lookup(EntityMysqlFieldTag)
-		if ok {
-			colValues = append(colValues, revf.Interface())
-		}
+		colValues = append(colValues, revf.Interface())
 	}
 
 	return colValues
@@ -102,7 +116,7 @@ func ReflectEntityScanDests(rev reflect.Value) []interface{} {
 			continue
 		}
 
-		_, ok := ret.Field(i).Tag.Lookup(EntityMysqlFieldTag)
+		_, ok := ret.Field(i).Tag.Lookup(EntityTagColumn)
 		if ok {
 			dests = append(dests, revf.Addr().Interface())
 		}
