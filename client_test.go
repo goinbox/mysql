@@ -11,7 +11,7 @@ import (
 var client *Client
 
 type tableDemoRowItem struct {
-	Id       int64
+	ID       int64
 	AddTime  string
 	EditTime string
 	Name     string
@@ -35,9 +35,9 @@ func TestClientExec(t *testing.T) {
 	} else {
 		li, err := result.LastInsertId()
 		if err != nil {
-			t.Error("lastInsertId error: " + err.Error())
+			t.Error("lastInsertID error: " + err.Error())
 		} else {
-			t.Log("lastInsertId: " + strconv.FormatInt(li, 10))
+			t.Log("lastInsertID: " + strconv.FormatInt(li, 10))
 		}
 
 		rf, err := result.RowsAffected()
@@ -56,7 +56,7 @@ func TestClientQuery(t *testing.T) {
 	} else {
 		for rows.Next() {
 			item := new(tableDemoRowItem)
-			err = rows.Scan(&item.Id, &item.AddTime, &item.EditTime, &item.Name, &item.Status)
+			err = rows.Scan(&item.ID, &item.AddTime, &item.EditTime, &item.Name, &item.Status)
 			if err != nil {
 				t.Error("rows scan error: " + err.Error())
 			} else {
@@ -69,7 +69,7 @@ func TestClientQuery(t *testing.T) {
 func TestClientQueryRow(t *testing.T) {
 	row := client.QueryRow("SELECT * FROM demo WHERE name = ?", "a")
 	item := new(tableDemoRowItem)
-	err := row.Scan(&item.Id, &item.AddTime, &item.EditTime, &item.Name, &item.Status)
+	err := row.Scan(&item.ID, &item.AddTime, &item.EditTime, &item.Name, &item.Status)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			t.Log("no rows: " + err.Error())
@@ -86,7 +86,7 @@ func TestClientTrans(t *testing.T) {
 
 	row := client.QueryRow("SELECT * FROM demo WHERE name = ?", "a")
 	item := new(tableDemoRowItem)
-	err := row.Scan(&item.Id, &item.AddTime, &item.EditTime, &item.Name, &item.Status)
+	err := row.Scan(&item.ID, &item.AddTime, &item.EditTime, &item.Name, &item.Status)
 	if err != nil {
 		t.Error("row scan error: " + err.Error())
 	} else {

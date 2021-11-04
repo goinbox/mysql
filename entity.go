@@ -141,9 +141,9 @@ func (d *EntityDao) InsertEntities(tableName string, entities ...interface{}) *S
 	return d.Insert(tableName, colNames, colsValues...)
 }
 
-func (d *EntityDao) SelectEntityById(tableName string, id int64, entity interface{}) error {
+func (d *EntityDao) SelectEntityByID(tableName string, id int64, entity interface{}) error {
 	colNames := ReflectColNamesByValue(reflect.ValueOf(entity).Elem(), false)
-	row := d.SelectById(tableName, strings.Join(colNames, ","), id)
+	row := d.SelectByID(tableName, strings.Join(colNames, ","), id)
 	dests := ReflectEntityScanDests(reflect.ValueOf(entity).Elem())
 
 	return row.Scan(dests...)

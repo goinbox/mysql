@@ -15,7 +15,7 @@ func TestDaoRead(t *testing.T) {
 	dao := &Dao{client}
 	entity := new(demoEntity)
 
-	row := dao.SelectById(SQL_TEST_TABLE_NAME, "*", 1)
+	row := dao.SelectByID(SQL_TEST_TABLE_NAME, "*", 1)
 	_ = row.Scan(&entity.ID, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
 	t.Log(entity)
 
@@ -65,14 +65,14 @@ func TestDaoWrite(t *testing.T) {
 		}
 	}
 
-	id := result.LastInsertId
+	id := result.LastInsertID
 	updateFields := map[string]interface{}{
 		"name":      "abc",
 		"edit_time": ts,
 	}
-	result = dao.UpdateByIds(SQL_TEST_TABLE_NAME, updateFields, id)
+	result = dao.UpdateByIDs(SQL_TEST_TABLE_NAME, updateFields, id)
 	t.Log(result)
 
-	result = dao.DeleteByIds(SQL_TEST_TABLE_NAME, id)
+	result = dao.DeleteByIDs(SQL_TEST_TABLE_NAME, id)
 	t.Log(result)
 }

@@ -14,7 +14,7 @@ type SqlQueryParams struct {
 
 type SqlExecResult struct {
 	Err          error
-	LastInsertId int64
+	LastInsertID int64
 	RowsAffected int64
 }
 
@@ -30,7 +30,7 @@ func (d *Dao) Insert(tableName string, colNames []string, colsValues ...[]interf
 	return ConvertSqlResultToSqlExecResult(d.Exec(sqb.Query(), sqb.Args()...))
 }
 
-func (d *Dao) DeleteByIds(tableName string, ids ...int64) *SqlExecResult {
+func (d *Dao) DeleteByIDs(tableName string, ids ...int64) *SqlExecResult {
 	sqb := new(SqlQueryBuilder)
 
 	sqb.Delete(tableName)
@@ -43,7 +43,7 @@ func (d *Dao) DeleteByIds(tableName string, ids ...int64) *SqlExecResult {
 	return ConvertSqlResultToSqlExecResult(d.Exec(sqb.Query(), sqb.Args()...))
 }
 
-func (d *Dao) UpdateByIds(tableName string, updateFields map[string]interface{}, ids ...int64) *SqlExecResult {
+func (d *Dao) UpdateByIDs(tableName string, updateFields map[string]interface{}, ids ...int64) *SqlExecResult {
 	sqb := new(SqlQueryBuilder)
 
 	sqb.Update(tableName).Set(updateFields)
@@ -56,7 +56,7 @@ func (d *Dao) UpdateByIds(tableName string, updateFields map[string]interface{},
 	return ConvertSqlResultToSqlExecResult(d.Exec(sqb.Query(), sqb.Args()...))
 }
 
-func (d *Dao) SelectById(tableName string, what string, id int64) *sql.Row {
+func (d *Dao) SelectByID(tableName string, what string, id int64) *sql.Row {
 	sqb := new(SqlQueryBuilder)
 	sqb.Select(what, tableName).
 		WhereConditionAnd(&SqlColQueryItem{"id", SqlCondEqual, id})
@@ -94,7 +94,7 @@ func ConvertSqlResultToSqlExecResult(sqlResult sql.Result, err error) *SqlExecRe
 		if err != nil {
 			execResult.Err = err
 		} else {
-			execResult.LastInsertId = lid
+			execResult.LastInsertID = lid
 			ra, err := sqlResult.RowsAffected()
 			if err != nil {
 				execResult.Err = err

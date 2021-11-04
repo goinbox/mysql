@@ -31,10 +31,13 @@ func TestInsertEntities(t *testing.T) {
 	t.Log(err)
 }
 
-func TestSelectEntityById(t *testing.T) {
+func TestSelectEntityByID(t *testing.T) {
 	entity := new(demoEntity)
-	err := entityDao().SelectEntityById("demo", 100, entity)
-	t.Log(err, entity, NoRowsError(err), *entity.ID, *entity.AddTime, *entity.EditTime)
+	err := entityDao().SelectEntityByID("demo", 100, entity)
+	t.Log(err, entity, NoRowsError(err))
+	if err == nil {
+		t.Log(*entity.ID, *entity.AddTime, *entity.EditTime)
+	}
 }
 
 func TestSimpleQueryEntitiesAnd(t *testing.T) {
