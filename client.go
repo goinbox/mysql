@@ -57,16 +57,21 @@ func NewClient(config *Config, logger golog.Logger) (*Client, error) {
 }
 
 func newClient(db *sql.DB, config *Config, logger golog.Logger) *Client {
-	return &Client{
+	client := &Client{
 		db: db,
 		tx: nil,
 
 		config: config,
-		logger: logger.With(&golog.Field{
+	}
+
+	if logger != nil {
+		client.logger = logger.With(&golog.Field{
 			Key:   config.LogFieldKeyAddr,
 			Value: config.Addr,
-		}),
+		})
 	}
+
+	return client
 }
 
 func (c *Client) Exec(query string, args ...interface{}) (sql.Result, error) {
@@ -140,6 +145,10 @@ func (c *Client) Rollback() error {
 }
 
 func (c *Client) log(query string, args ...interface{}) {
+	if c.logger == nil {
+		return
+	}
+
 	query = strings.Replace(query, "?", "%s", -1)
 	vs := make([]interface{}, len(args))
 
