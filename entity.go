@@ -16,7 +16,7 @@ var (
 	entityFieldRegex = regexp.MustCompile("([A-Z][a-z0-9]*)")
 )
 
-func columnByField(field *reflect.StructField) string {
+func ColumnNameByField(field *reflect.StructField) string {
 	name, ok := field.Tag.Lookup(EntityTagColumn)
 	if ok {
 		return name
@@ -48,7 +48,7 @@ func ReflectColNamesByType(ret reflect.Type) []string {
 			}
 		}
 
-		cns = append(cns, columnByField(&retf))
+		cns = append(cns, ColumnNameByField(&retf))
 	}
 
 	return cns
@@ -75,7 +75,7 @@ func ReflectColNamesByValue(rev reflect.Value, filterNil bool) []string {
 		}
 
 		retf := ret.Field(i)
-		cns = append(cns, columnByField(&retf))
+		cns = append(cns, ColumnNameByField(&retf))
 	}
 
 	return cns
