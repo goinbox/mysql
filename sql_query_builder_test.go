@@ -37,9 +37,16 @@ func TestSQBUpdate(t *testing.T) {
 }
 
 func TestSQBSet(t *testing.T) {
-	sqb.Set(map[string]interface{}{
-		"name":      "d",
-		"edit_time": "2016-06-24 09:00:00",
+	sqb.Set([]*SqlUpdateColumn{
+		{
+			Name:  "name",
+			Value: "d",
+		},
+		{
+			Name:   "version",
+			Value:  "version + 1",
+			NoBind: true,
+		},
 	})
 
 	printQueryAndArgs()
@@ -55,10 +62,10 @@ func TestSQBSelect(t *testing.T) {
 
 func TestSQBWhere(t *testing.T) {
 	sqb.WhereConditionAnd(
-		//NewSqlColQueryItem("id", SqlCondIn, []int64{1, 2}),
-		//NewSqlColQueryItem("add_time", SqlCondBetween, []string{"2016-06-23 00:00:00", "2016-06-25 00:00:00"}),
+		// NewSqlColQueryItem("id", SqlCondIn, []int64{1, 2}),
+		// NewSqlColQueryItem("add_time", SqlCondBetween, []string{"2016-06-23 00:00:00", "2016-06-25 00:00:00"}),
 		&SqlColQueryItem{"edit_time", SqlCondLessEqual, "2016-06-24 09:00:00"},
-		//NewSqlColQueryItem("name", SqlCondLike, "%a%"),
+		// NewSqlColQueryItem("name", SqlCondLike, "%a%"),
 	)
 	printQueryAndArgs()
 }

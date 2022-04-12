@@ -66,11 +66,18 @@ func TestDaoWrite(t *testing.T) {
 	}
 
 	id := result.LastInsertID
-	updateFields := map[string]interface{}{
-		"name":      "abc",
-		"edit_time": ts,
+	updateColumns := []*SqlUpdateColumn{
+		{
+			Name:  "name",
+			Value: "abc",
+		},
+		{
+			Name:   "status",
+			Value:  "status + 1",
+			NoBind: true,
+		},
 	}
-	result = dao.UpdateByIDs(SQL_TEST_TABLE_NAME, updateFields, id)
+	result = dao.UpdateByIDs(SQL_TEST_TABLE_NAME, updateColumns, id)
 	t.Log(result)
 
 	result = dao.DeleteByIDs(SQL_TEST_TABLE_NAME, id)

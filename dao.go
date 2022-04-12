@@ -43,10 +43,10 @@ func (d *Dao) DeleteByIDs(tableName string, ids ...int64) *SqlExecResult {
 	return ConvertSqlResultToSqlExecResult(d.Exec(sqb.Query(), sqb.Args()...))
 }
 
-func (d *Dao) UpdateByIDs(tableName string, updateFields map[string]interface{}, ids ...int64) *SqlExecResult {
+func (d *Dao) UpdateByIDs(tableName string, updateColumns []*SqlUpdateColumn, ids ...int64) *SqlExecResult {
 	sqb := new(SqlQueryBuilder)
 
-	sqb.Update(tableName).Set(updateFields)
+	sqb.Update(tableName).Set(updateColumns)
 	if len(ids) == 1 {
 		sqb.WhereConditionAnd(&SqlColQueryItem{"id", SqlCondEqual, ids[0]})
 	} else {

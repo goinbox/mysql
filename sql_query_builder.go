@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -22,6 +23,12 @@ type SqlColQueryItem struct {
 	Name      string
 	Condition string
 	Value     interface{}
+}
+
+type SqlUpdateColumn struct {
+	Name   string
+	Value  interface{}
+	NoBind bool
 }
 
 type SqlQueryBuilder struct {
@@ -78,15 +85,19 @@ func (s *SqlQueryBuilder) Update(tableName string) *SqlQueryBuilder {
 	return s
 }
 
-func (s *SqlQueryBuilder) Set(updateFields map[string]interface{}) *SqlQueryBuilder {
-	if updateFields == nil || len(updateFields) == 0 {
+func (s *SqlQueryBuilder) Set(updateColumns []*SqlUpdateColumn) *SqlQueryBuilder {
+	if updateColumns == nil || len(updateColumns) == 0 {
 		return s
 	}
 
 	s.query += " SET "
-	for name, value := range updateFields {
-		s.query += name + " = ?, "
-		s.args = append(s.args, value)
+	for _, column := range updateColumns {
+		if column.NoBind {
+			s.query += column.Name + " = " + fmt.Sprint(column.Value) + ", "
+		} else {
+			s.query += column.Name + " = ?, "
+			s.args = append(s.args, column.Value)
+		}
 	}
 	s.query = s.query[0 : len(s.query)-2]
 
