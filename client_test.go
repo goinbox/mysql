@@ -82,19 +82,13 @@ func TestClientQueryRow(t *testing.T) {
 }
 
 func TestClientTrans(t *testing.T) {
-	client.Begin()
+	_ = client.Begin()
 
-	row := client.QueryRow("SELECT * FROM demo WHERE name = ?", "a")
-	item := new(tableDemoRowItem)
-	err := row.Scan(&item.ID, &item.AddTime, &item.EditTime, &item.Name, &item.Status)
-	if err != nil {
-		t.Error("row scan error: " + err.Error())
-	} else {
-		t.Log(item)
-	}
+	_, err := client.Exec("insert into demo (name) values ('ab')")
+	_, err = client.Exec("insert into id_gen (name) values ('demo')")
 
-	client.Commit()
+	_ = client.Commit()
 
-	err = client.Rollback()
+	// err = client.Rollback()
 	t.Log(err)
 }
