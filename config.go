@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	DefaultConnectTimeout = 10 * time.Second
-	DefaultReadTimeout    = 10 * time.Second
-	DefaultWriteTimeout   = 10 * time.Second
+	DefaultConnectTimeout  = 10 * time.Second
+	DefaultReadTimeout     = 10 * time.Second
+	DefaultWriteTimeout    = 10 * time.Second
+	DefaultConnMaxLifetime = 30 * time.Second
 
 	DefaultLogFieldKeyAddr = "mysql"
 	DefaultLogFieldKeySql  = "sql"
@@ -18,6 +19,8 @@ const (
 
 type Config struct {
 	*mysql.Config
+
+	ConnMaxLifetime time.Duration
 
 	LogFieldKeyAddr string
 	LogFieldKeySql  string
@@ -45,6 +48,8 @@ func NewDefaultConfig(user, pass, host, dbname string, port int) *Config {
 
 	return &Config{
 		Config: config,
+
+		ConnMaxLifetime: DefaultConnMaxLifetime,
 
 		LogFieldKeyAddr: DefaultLogFieldKeyAddr,
 		LogFieldKeySql:  DefaultLogFieldKeySql,

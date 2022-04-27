@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/goinbox/golog"
 )
@@ -90,5 +91,21 @@ func TestClientTrans(t *testing.T) {
 	_ = client.Commit()
 
 	// err = client.Rollback()
+	t.Log(err)
+}
+
+func TestClientPool(t *testing.T) {
+	key := "test"
+	_ = RegisterDB(key, NewDefaultConfig("root", "123", "127.0.0.1", "gobox-demo", 3306))
+
+	w, _ := golog.NewFileWriter("/dev/stdout", 0)
+	logger := golog.NewSimpleLogger(w, golog.NewSimpleFormater())
+	client, _ = NewClientFromPool(key, logger)
+
+	_, err := client.Exec("update demo set status = 1")
+	t.Log(err)
+
+	time.Sleep(time.Minute * 5)
+	_, err = client.Exec("update demo set status = 1")
 	t.Log(err)
 }

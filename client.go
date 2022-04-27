@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/goinbox/golog"
 )
@@ -16,12 +17,24 @@ type dbItem struct {
 
 var dbPool = map[string]*dbItem{}
 
-func RegisterDB(key string, config *Config) error {
+func newDB(config *Config) (*sql.DB, error) {
 	db, err := sql.Open("mysql", config.FormatDSN())
+	if err != nil {
+		return nil, fmt.Errorf("newDB error: %w", err)
+	}
+
+	db.SetConnMaxLifetime(config.ConnMaxLifetime)
+
+	return db, nil
+}
+
+func RegisterDB(key string, config *Config) error {
+	db, err := newDB(config)
 	if err != nil {
 		return nil
 	}
 
+	db.SetConnMaxLifetime(time.Second * 30)
 	dbPool[key] = &dbItem{
 		config: config,
 		db:     db,
@@ -48,9 +61,9 @@ func NewClientFromPool(key string, logger golog.Logger) (*Client, error) {
 }
 
 func NewClient(config *Config, logger golog.Logger) (*Client, error) {
-	db, err := sql.Open("mysql", config.FormatDSN())
+	db, err := newDB(config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("newDB error: %w", err)
 	}
 
 	return newClient(db, config, logger), nil
