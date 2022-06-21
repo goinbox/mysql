@@ -13,7 +13,16 @@ const (
 )
 
 var (
-	entityFieldRegex = regexp.MustCompile("([A-Z][a-z0-9]*)")
+	entityFieldRegex         = regexp.MustCompile("([A-Z][a-z0-9]*)")
+	entityFieldKindStructMap = map[string]bool{
+		"time.Time":       true,
+		"sql.NullString":  true,
+		"sql.NullTime":    true,
+		"sql.NullBool":    true,
+		"sql.NullInt64":   true,
+		"sql.NullInt32":   true,
+		"sql.NullFloat64": true,
+	}
 )
 
 func ColumnNameByField(field *reflect.StructField) string {
@@ -42,7 +51,8 @@ func ReflectColNamesByType(ret reflect.Type) []string {
 		}
 
 		if ftype.Kind() == reflect.Struct {
-			if ftype.String() != "time.Time" {
+			_, ok := entityFieldKindStructMap[ftype.String()]
+			if !ok {
 				cns = append(cns, ReflectColNamesByType(ftype)...)
 				continue
 			}
@@ -68,7 +78,8 @@ func ReflectColNamesByValue(rev reflect.Value, filterNil bool) []string {
 		}
 
 		if revf.Kind() == reflect.Struct {
-			if revf.Type().String() != "time.Time" {
+			_, ok := entityFieldKindStructMap[revf.Type().String()]
+			if !ok {
 				cns = append(cns, ReflectColNamesByValue(revf, filterNil)...)
 				continue
 			}
@@ -93,7 +104,8 @@ func ReflectColValues(rev reflect.Value, filterNil bool) []interface{} {
 			revf = revf.Elem()
 		}
 		if revf.Kind() == reflect.Struct {
-			if revf.Type().String() != "time.Time" {
+			_, ok := entityFieldKindStructMap[revf.Type().String()]
+			if !ok {
 				colValues = append(colValues, ReflectColValues(revf, filterNil)...)
 				continue
 			}
@@ -111,8 +123,11 @@ func ReflectEntityScanDests(rev reflect.Value) []interface{} {
 	for i := 0; i < rev.NumField(); i++ {
 		revf := rev.Field(i)
 		if revf.Kind() == reflect.Struct {
-			dests = ReflectEntityScanDests(revf)
-			continue
+			_, ok := entityFieldKindStructMap[revf.Type().String()]
+			if !ok {
+				dests = ReflectEntityScanDests(revf)
+				continue
+			}
 		}
 
 		dests = append(dests, revf.Addr().Interface())
