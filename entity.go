@@ -125,7 +125,7 @@ func ReflectEntityScanDests(rev reflect.Value) []interface{} {
 		if revf.Kind() == reflect.Struct {
 			_, ok := entityFieldKindStructMap[revf.Type().String()]
 			if !ok {
-				dests = ReflectEntityScanDests(revf)
+				dests = append(dests, ReflectEntityScanDests(revf)...)
 				continue
 			}
 		}
