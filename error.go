@@ -2,19 +2,17 @@ package mysql
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/go-sql-driver/mysql"
 )
 
 func DuplicateError(err error) bool {
-	if err == nil {
-		return false
-	}
+	var e *mysql.MySQLError
 
-	mysqlError, ok := err.(*mysql.MySQLError)
-	if ok {
+	if errors.As(err, &e) {
 		// mariadb-10.5.9/libmariadb/include/mysqld_error.h:69:#define ER_DUP_ENTRY 1062
-		if mysqlError.Number == 1062 {
+		if e.Number == 1062 {
 			return true
 		}
 	}
@@ -23,7 +21,7 @@ func DuplicateError(err error) bool {
 }
 
 func NoRowsError(err error) bool {
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return true
 	}
 
