@@ -62,10 +62,9 @@ func TestSQBSelect(t *testing.T) {
 
 func TestSQBWhere(t *testing.T) {
 	sqb.WhereConditionAnd(
-		// NewSqlColQueryItem("id", SqlCondIn, []int64{1, 2}),
-		// NewSqlColQueryItem("add_time", SqlCondBetween, []string{"2016-06-23 00:00:00", "2016-06-25 00:00:00"}),
-		&SqlColQueryItem{"edit_time", SqlCondLessEqual, "2016-06-24 09:00:00"},
-		// NewSqlColQueryItem("name", SqlCondLike, "%a%"),
+		// &SqlColQueryItem{"edit_time", SqlCondLessEqual, "2016-06-24 09:00:00", false},
+		// &SqlColQueryItem{"quota", SqlCondLessEqual, "total", true},
+		&SqlColQueryItem{"quota", SqlCondBetween, []int{1, 2}, true},
 	)
 	printQueryAndArgs()
 }
@@ -77,7 +76,7 @@ func TestSQBGroupBy(t *testing.T) {
 
 func TestSQBHaving(t *testing.T) {
 	sqb.HavingConditionAnd(
-		&SqlColQueryItem{"id", SqlCondGreater, 3},
+		&SqlColQueryItem{"id", SqlCondGreater, 3, false},
 	)
 	printQueryAndArgs()
 }

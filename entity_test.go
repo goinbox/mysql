@@ -46,7 +46,7 @@ func TestSelectEntityByID(t *testing.T) {
 func TestSimpleQueryEntitiesAnd(t *testing.T) {
 	var entityList []*demoEntity
 	condItems := []*SqlColQueryItem{
-		{"name", SqlCondEqual, "demo"},
+		{"name", SqlCondEqual, "demo", false},
 	}
 	params := &SqlQueryParams{
 		CondItems: condItems,

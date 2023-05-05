@@ -23,6 +23,7 @@ type SqlColQueryItem struct {
 	Name      string
 	Condition string
 	Value     interface{}
+	NoBind    bool
 }
 
 type SqlUpdateColumn struct {
@@ -227,19 +228,32 @@ func (s *SqlQueryBuilder) buildWhereCondition(andOr string, condItems ...*SqlCol
 func (s *SqlQueryBuilder) buildCondition(condItem *SqlColQueryItem) {
 	switch condItem.Condition {
 	case SqlCondEqual, SqlCondNotEqual, SqlCondLess, SqlCondLessEqual, SqlCondGreater, SqlCondGreaterEqual:
-		s.query += condItem.Name + " " + condItem.Condition + " ?"
-		s.args = append(s.args, condItem.Value)
+		if condItem.NoBind {
+			s.query += fmt.Sprintf("%s %s %s", condItem.Name, condItem.Condition, fmt.Sprint(condItem.Value))
+		} else {
+			s.query += fmt.Sprintf("%s %s ?", condItem.Name, condItem.Condition)
+			s.args = append(s.args, condItem.Value)
+		}
 	case SqlCondIn:
 		s.buildConditionInOrNotIn(condItem, "IN")
 	case SqlCondNotIn:
 		s.buildConditionInOrNotIn(condItem, "NOT IN")
 	case SqlCondLike:
-		s.query += condItem.Name + " LIKE ?"
-		s.args = append(s.args, condItem.Value)
+		if condItem.NoBind {
+			s.query += fmt.Sprintf("%s LIKE %s", condItem.Name, fmt.Sprint(condItem.Value))
+		} else {
+			s.query += fmt.Sprintf("%s LIKE ?", condItem.Name)
+			s.args = append(s.args, condItem.Value)
+		}
 	case SqlCondBetween:
 		rev := reflect.ValueOf(condItem.Value)
-		s.query += condItem.Name + " BETWEEN ? AND ?"
-		s.args = append(s.args, rev.Index(0).Interface(), rev.Index(1).Interface())
+		if condItem.NoBind {
+			s.query += fmt.Sprintf("%s BETWEEN %s AND %s",
+				condItem.Name, fmt.Sprint(rev.Index(0).Interface()), fmt.Sprint(rev.Index(1).Interface()))
+		} else {
+			s.query += fmt.Sprintf("%s BETWEEN ? AND ?", condItem.Name)
+			s.args = append(s.args, rev.Index(0).Interface(), rev.Index(1).Interface())
+		}
 	}
 }
 

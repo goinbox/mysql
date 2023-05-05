@@ -20,9 +20,9 @@ func TestDaoRead(t *testing.T) {
 	t.Log(entity)
 
 	condItems := []*SqlColQueryItem{
-		{"name", SqlCondLike, "%a%"},
-		{"id", SqlCondBetween, []int64{0, 100}},
-		{"status", SqlCondEqual, 0},
+		{"name", SqlCondLike, "%a%", false},
+		{"id", SqlCondBetween, []int64{0, 100}, false},
+		{"status", SqlCondEqual, 0, false},
 	}
 	params := &SqlQueryParams{
 		CondItems: condItems,
