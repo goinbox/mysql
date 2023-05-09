@@ -92,6 +92,16 @@ func TestClientTrans(t *testing.T) {
 
 	// err = client.Rollback()
 	t.Log(err)
+
+	_ = client.Begin()
+	_, _ = client.Exec("update id_gen set max_id = 100")
+	r, err := client.Exec("update demo set name = 'abc' where id = 0")
+	t.Log(err)
+	n, err := r.RowsAffected()
+	t.Log(n, err)
+	if n == 0 {
+		_ = client.Rollback()
+	}
 }
 
 func TestClientPool(t *testing.T) {
