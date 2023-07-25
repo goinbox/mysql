@@ -43,12 +43,16 @@ func RegisterDB(key string, config *Config) error {
 	return nil
 }
 
+type PrepareQueryFunc func(query string, args ...interface{}) (string, []interface{})
+
 type Client struct {
 	db *sql.DB
 	tx *sql.Tx
 
 	config *Config
 	logger golog.Logger
+
+	prepareQuery PrepareQueryFunc
 }
 
 func NewClientFromPool(key string, logger golog.Logger) (*Client, error) {
@@ -87,34 +91,46 @@ func newClient(db *sql.DB, config *Config, logger golog.Logger) *Client {
 	return client
 }
 
+func (c *Client) SetPrepareQuery(f PrepareQueryFunc) *Client {
+	c.prepareQuery = f
+
+	return c
+}
+
 func (c *Client) Exec(query string, args ...interface{}) (sql.Result, error) {
+	if c.prepareQuery != nil {
+		query, args = c.prepareQuery(query, args...)
+	}
 	c.log(query, args...)
 
 	if c.tx != nil {
 		return c.tx.Exec(query, args...)
-	} else {
-		return c.db.Exec(query, args...)
 	}
+	return c.db.Exec(query, args...)
 }
 
 func (c *Client) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	if c.prepareQuery != nil {
+		query, args = c.prepareQuery(query, args...)
+	}
 	c.log(query, args...)
 
 	if c.tx != nil {
 		return c.tx.Query(query, args...)
-	} else {
-		return c.db.Query(query, args...)
 	}
+	return c.db.Query(query, args...)
 }
 
 func (c *Client) QueryRow(query string, args ...interface{}) *sql.Row {
+	if c.prepareQuery != nil {
+		query, args = c.prepareQuery(query, args...)
+	}
 	c.log(query, args...)
 
 	if c.tx != nil {
 		return c.tx.QueryRow(query, args...)
-	} else {
-		return c.db.QueryRow(query, args...)
 	}
+	return c.db.QueryRow(query, args...)
 }
 
 func (c *Client) Begin() error {

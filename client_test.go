@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"database/sql"
+	"fmt"
 	"strconv"
 	"testing"
 	"time"
@@ -25,7 +26,10 @@ func init() {
 
 	config := NewDefaultConfig("root", "123", "127.0.0.1", "gobox-demo", 3306)
 	client, _ = NewClient(config, logger)
-
+	client.SetPrepareQuery(func(query string, args ...interface{}) (string, []interface{}) {
+		query = fmt.Sprintf("/*prepare query*/ %s", query)
+		return query, args
+	})
 	// client.Exec("DELETE FROM demo")
 }
 
