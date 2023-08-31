@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/goinbox/golog"
+	"github.com/goinbox/pcontext"
 )
 
 type dbItem struct {
@@ -50,42 +51,34 @@ type Client struct {
 	tx *sql.Tx
 
 	config *Config
-	logger golog.Logger
 
 	prepareQuery PrepareQueryFunc
 }
 
-func NewClientFromPool(key string, logger golog.Logger) (*Client, error) {
+func NewClientFromPool(key string) (*Client, error) {
 	item, ok := dbPool[key]
 	if !ok {
 		return nil, errors.New("DB " + key + " not exist")
 	}
 
-	return newClient(item.db, item.config, logger), nil
+	return newClient(item.db, item.config), nil
 }
 
-func NewClient(config *Config, logger golog.Logger) (*Client, error) {
+func NewClient(config *Config) (*Client, error) {
 	db, err := newDB(config)
 	if err != nil {
 		return nil, fmt.Errorf("newDB error: %w", err)
 	}
 
-	return newClient(db, config, logger), nil
+	return newClient(db, config), nil
 }
 
-func newClient(db *sql.DB, config *Config, logger golog.Logger) *Client {
+func newClient(db *sql.DB, config *Config) *Client {
 	client := &Client{
 		db: db,
 		tx: nil,
 
 		config: config,
-	}
-
-	if logger != nil {
-		client.logger = logger.With(&golog.Field{
-			Key:   config.LogFieldKeyAddr,
-			Value: config.Addr,
-		})
 	}
 
 	return client
@@ -97,84 +90,88 @@ func (c *Client) SetPrepareQuery(f PrepareQueryFunc) *Client {
 	return c
 }
 
-func (c *Client) Exec(query string, args ...interface{}) (sql.Result, error) {
+func (c *Client) Exec(ctx pcontext.Context, query string, args ...interface{}) (sql.Result, error) {
 	if c.prepareQuery != nil {
 		query, args = c.prepareQuery(query, args...)
 	}
-	c.log(query, args...)
+	c.log(ctx.Logger(), query, args...)
 
 	if c.tx != nil {
 		return c.tx.Exec(query, args...)
 	}
-	return c.db.Exec(query, args...)
+	return c.db.ExecContext(ctx, query, args...)
 }
 
-func (c *Client) Query(query string, args ...interface{}) (*sql.Rows, error) {
+func (c *Client) Query(ctx pcontext.Context, query string, args ...interface{}) (*sql.Rows, error) {
 	if c.prepareQuery != nil {
 		query, args = c.prepareQuery(query, args...)
 	}
-	c.log(query, args...)
+	c.log(ctx.Logger(), query, args...)
 
 	if c.tx != nil {
 		return c.tx.Query(query, args...)
 	}
-	return c.db.Query(query, args...)
+	return c.db.QueryContext(ctx, query, args...)
 }
 
-func (c *Client) QueryRow(query string, args ...interface{}) *sql.Row {
+func (c *Client) QueryRow(ctx pcontext.Context, query string, args ...interface{}) *sql.Row {
 	if c.prepareQuery != nil {
 		query, args = c.prepareQuery(query, args...)
 	}
-	c.log(query, args...)
+	c.log(ctx.Logger(), query, args...)
 
 	if c.tx != nil {
 		return c.tx.QueryRow(query, args...)
 	}
-	return c.db.QueryRow(query, args...)
+	return c.db.QueryRowContext(ctx, query, args...)
 }
 
-func (c *Client) Begin() error {
+func (c *Client) Begin(ctx pcontext.Context) error {
+	if c.tx != nil {
+		return errors.New("already in trans")
+	}
+
 	tx, err := c.db.Begin()
 	if err != nil {
 		return err
 	}
 
-	c.log("BEGIN")
+	c.log(ctx.Logger(), "BEGIN")
 	c.tx = tx
 
 	return nil
 }
 
-func (c *Client) Commit() error {
+func (c *Client) Commit(ctx pcontext.Context) error {
 	defer func() {
 		c.tx = nil
 	}()
 
 	if c.tx != nil {
-		c.log("COMMIT")
+		c.log(ctx.Logger(), "COMMIT")
 
 		return c.tx.Commit()
 	}
 
-	return errors.New("Not in trans")
+	return errors.New("not in trans")
 }
 
-func (c *Client) Rollback() error {
+func (c *Client) Rollback(ctx pcontext.Context) error {
 	defer func() {
 		c.tx = nil
 	}()
 
 	if c.tx != nil {
-		c.log("ROLLBACK")
+		c.log(ctx.Logger(), "ROLLBACK")
 
 		return c.tx.Rollback()
 	}
 
-	return errors.New("Not in trans")
+	return errors.New("not in trans")
 }
 
-func (c *Client) log(query string, args ...interface{}) {
-	if c.logger == nil {
+func (c *Client) log(logger golog.Logger, query string, args ...interface{}) {
+	if logger == nil {
 		return
 	}
 
@@ -191,8 +188,11 @@ func (c *Client) log(query string, args ...interface{}) {
 		}
 	}
 
-	c.logger.Info("run sql", &golog.Field{
+	logger.Info("run sql", &golog.Field{
 		Key:   c.config.LogFieldKeySql,
 		Value: fmt.Sprintf(query, vs...),
+	}, &golog.Field{
+		Key:   c.config.LogFieldKeyAddr,
+		Value: c.config.Addr,
 	})
 }

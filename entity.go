@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/goinbox/pcontext"
 )
 
 const (
@@ -156,28 +158,28 @@ type EntityDao struct {
 	Dao
 }
 
-func (d *EntityDao) InsertEntities(tableName string, entities ...interface{}) *SqlExecResult {
+func (d *EntityDao) InsertEntities(ctx pcontext.Context, tableName string, entities ...interface{}) *SqlExecResult {
 	colNames := ReflectColNamesByValue(reflect.ValueOf(entities[0]).Elem(), true)
 	colsValues := make([][]interface{}, len(entities))
 	for i, item := range entities {
 		colsValues[i] = ReflectColValues(reflect.ValueOf(item).Elem(), true)
 	}
 
-	return d.Insert(tableName, colNames, colsValues...)
+	return d.Insert(ctx, tableName, colNames, colsValues...)
 }
 
-func (d *EntityDao) SelectEntityByID(tableName string, id int64, entity interface{}) error {
+func (d *EntityDao) SelectEntityByID(ctx pcontext.Context, tableName string, id int64, entity interface{}) error {
 	colNames := ReflectColNamesByValue(reflect.ValueOf(entity).Elem(), false)
-	row := d.SelectByID(tableName, strings.Join(colNames, ","), id)
+	row := d.SelectByID(ctx, tableName, strings.Join(colNames, ","), id)
 	dests := ReflectEntityScanDests(reflect.ValueOf(entity).Elem())
 
 	return row.Scan(dests...)
 }
 
-func (d *EntityDao) SimpleQueryEntitiesAnd(tableName string, params *SqlQueryParams, entitiesPtr interface{}) error {
+func (d *EntityDao) SimpleQueryEntitiesAnd(ctx pcontext.Context, tableName string, params *SqlQueryParams, entitiesPtr interface{}) error {
 	ret := reflect.TypeOf(entitiesPtr).Elem().Elem().Elem()
 	colNames := ReflectColNamesByType(ret)
-	rows, err := d.SimpleQueryAnd(tableName, strings.Join(colNames, ","), params)
+	rows, err := d.SimpleQueryAnd(ctx, tableName, strings.Join(colNames, ","), params)
 	if err != nil {
 		return err
 	}

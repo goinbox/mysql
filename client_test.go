@@ -8,8 +8,10 @@ import (
 	"time"
 
 	"github.com/goinbox/golog"
+	"github.com/goinbox/pcontext"
 )
 
+var ctx pcontext.Context
 var client *Client
 
 type tableDemoRowItem struct {
@@ -23,9 +25,10 @@ type tableDemoRowItem struct {
 func init() {
 	w, _ := golog.NewFileWriter("/dev/stdout", 0)
 	logger := golog.NewSimpleLogger(w, golog.NewSimpleFormater())
+	ctx = pcontext.NewSimpleContext(logger)
 
 	config := NewDefaultConfig("root", "123", "127.0.0.1", "gobox-demo", 3306)
-	client, _ = NewClient(config, logger)
+	client, _ = NewClient(config)
 	client.SetPrepareQuery(func(query string, args ...interface{}) (string, []interface{}) {
 		query = fmt.Sprintf("/*prepare query*/ %s", query)
 		return query, args
@@ -34,7 +37,7 @@ func init() {
 }
 
 func TestClientExec(t *testing.T) {
-	result, err := client.Exec("INSERT INTO demo (name) VALUES (?),(?)", "a", "b")
+	result, err := client.Exec(ctx, "INSERT INTO demo (name) VALUES (?),(?)", "a", "b")
 	if err != nil {
 		t.Error("exec error: " + err.Error())
 	} else {
@@ -55,7 +58,7 @@ func TestClientExec(t *testing.T) {
 }
 
 func TestClientQuery(t *testing.T) {
-	rows, err := client.Query("SELECT * FROM demo WHERE name IN (?,?)", "a", "b")
+	rows, err := client.Query(ctx, "SELECT * FROM demo WHERE name IN (?,?)", "a", "b")
 	if err != nil {
 		t.Error("query error: " + err.Error())
 	} else {
@@ -72,7 +75,7 @@ func TestClientQuery(t *testing.T) {
 }
 
 func TestClientQueryRow(t *testing.T) {
-	row := client.QueryRow("SELECT * FROM demo WHERE name = ?", "a")
+	row := client.QueryRow(ctx, "SELECT * FROM demo WHERE name = ?", "a")
 	item := new(tableDemoRowItem)
 	err := row.Scan(&item.ID, &item.AddTime, &item.EditTime, &item.Name, &item.Status)
 	if err != nil {
@@ -87,24 +90,24 @@ func TestClientQueryRow(t *testing.T) {
 }
 
 func TestClientTrans(t *testing.T) {
-	_ = client.Begin()
+	_ = client.Begin(ctx)
 
-	_, err := client.Exec("insert into demo (name) values ('ab')")
-	_, err = client.Exec("insert into id_gen (name) values ('demo')")
+	_, err := client.Exec(ctx, "insert into demo (name) values ('ab')")
+	_, err = client.Exec(ctx, "insert into id_gen (name) values ('demo')")
 
-	_ = client.Commit()
+	_ = client.Commit(ctx)
 
 	// err = client.Rollback()
 	t.Log(err)
 
-	_ = client.Begin()
-	_, _ = client.Exec("update id_gen set max_id = 100")
-	r, err := client.Exec("update demo set name = 'abc' where id = 0")
+	_ = client.Begin(ctx)
+	_, _ = client.Exec(ctx, "update id_gen set max_id = 100")
+	r, err := client.Exec(ctx, "update demo set name = 'abc' where id = 0")
 	t.Log(err)
 	n, err := r.RowsAffected()
 	t.Log(n, err)
 	if n == 0 {
-		_ = client.Rollback()
+		_ = client.Rollback(ctx)
 	}
 }
 
@@ -112,14 +115,12 @@ func TestClientPool(t *testing.T) {
 	key := "test"
 	_ = RegisterDB(key, NewDefaultConfig("root", "123", "127.0.0.1", "gobox-demo", 3306))
 
-	w, _ := golog.NewFileWriter("/dev/stdout", 0)
-	logger := golog.NewSimpleLogger(w, golog.NewSimpleFormater())
-	client, _ = NewClientFromPool(key, logger)
+	client, _ = NewClientFromPool(key)
 
-	_, err := client.Exec("update demo set status = 1")
+	_, err := client.Exec(ctx, "update demo set status = 1")
 	t.Log(err)
 
 	time.Sleep(time.Minute * 5)
-	_, err = client.Exec("update demo set status = 1")
+	_, err = client.Exec(ctx, "update demo set status = 1")
 	t.Log(err)
 }

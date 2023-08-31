@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"database/sql"
 	"strconv"
 	"testing"
 	"time"
@@ -14,8 +13,6 @@ type demoEntity struct {
 
 	Name   string
 	Status int
-
-	StartTime sql.NullString
 }
 
 func TestInsertEntities(t *testing.T) {
@@ -30,13 +27,13 @@ func TestInsertEntities(t *testing.T) {
 		}
 	}
 
-	err := entityDao().InsertEntities("demo", entities...)
+	err := entityDao().InsertEntities(ctx, "demo", entities...)
 	t.Log(err)
 }
 
 func TestSelectEntityByID(t *testing.T) {
 	entity := new(demoEntity)
-	err := entityDao().SelectEntityByID("demo", 12, entity)
+	err := entityDao().SelectEntityByID(ctx, "demo", 58, entity)
 	t.Log(err, entity, NoRowsError(err))
 	if err == nil {
 		t.Log(*entity.ID, *entity.AddTime, *entity.EditTime, entity)
@@ -54,7 +51,7 @@ func TestSimpleQueryEntitiesAnd(t *testing.T) {
 		Offset:    0,
 		Cnt:       10,
 	}
-	err := entityDao().SimpleQueryEntitiesAnd("demo", params, &entityList)
+	err := entityDao().SimpleQueryEntitiesAnd(ctx, "demo", params, &entityList)
 	t.Log(err, NoRowsError(err))
 	for i, entity := range entityList {
 		t.Log(i, entity, *entity.ID, *entity.AddTime, *entity.EditTime)

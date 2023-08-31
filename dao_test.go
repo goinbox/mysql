@@ -15,7 +15,7 @@ func TestDaoRead(t *testing.T) {
 	dao := &Dao{client}
 	entity := new(demoEntity)
 
-	row := dao.SelectByID(SQL_TEST_TABLE_NAME, "*", 1)
+	row := dao.SelectByID(ctx, SQL_TEST_TABLE_NAME, "*", 1)
 	_ = row.Scan(&entity.ID, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
 	t.Log(entity)
 
@@ -30,13 +30,13 @@ func TestDaoRead(t *testing.T) {
 		Offset:    0,
 		Cnt:       10,
 	}
-	rows, _ := dao.SimpleQueryAnd(SQL_TEST_TABLE_NAME, "*", params)
+	rows, _ := dao.SimpleQueryAnd(ctx, SQL_TEST_TABLE_NAME, "*", params)
 	for rows.Next() {
 		_ = rows.Scan(&entity.ID, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
 		t.Log(entity)
 	}
 
-	total, _ := dao.SimpleTotalAnd(SQL_TEST_TABLE_NAME, condItems...)
+	total, _ := dao.SimpleTotalAnd(ctx, SQL_TEST_TABLE_NAME, condItems...)
 	t.Log(total)
 }
 
@@ -57,7 +57,7 @@ func TestDaoWrite(t *testing.T) {
 		}
 		colsValues = append(colsValues, colValues)
 	}
-	result := dao.Insert(SQL_TEST_TABLE_NAME, colNames, colsValues...)
+	result := dao.Insert(ctx, SQL_TEST_TABLE_NAME, colNames, colsValues...)
 	t.Log(result)
 	if result.Err != nil {
 		if DuplicateError(result.Err) {
@@ -77,9 +77,9 @@ func TestDaoWrite(t *testing.T) {
 			NoBind: true,
 		},
 	}
-	result = dao.UpdateByIDs(SQL_TEST_TABLE_NAME, updateColumns, id)
+	result = dao.UpdateByIDs(ctx, SQL_TEST_TABLE_NAME, updateColumns, id)
 	t.Log(result)
 
-	result = dao.DeleteByIDs(SQL_TEST_TABLE_NAME, id)
+	result = dao.DeleteByIDs(ctx, SQL_TEST_TABLE_NAME, id)
 	t.Log(result)
 }
