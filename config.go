@@ -22,8 +22,7 @@ type Config struct {
 
 	ConnMaxLifetime time.Duration
 
-	LogFieldKeyAddr string
-	LogFieldKeySql  string
+	LogFieldKeySql string
 }
 
 func NewDefaultConfig(user, pass, host, dbname string, port int) *Config {
@@ -51,7 +50,6 @@ func NewDefaultConfig(user, pass, host, dbname string, port int) *Config {
 
 		ConnMaxLifetime: DefaultConnMaxLifetime,
 
-		LogFieldKeyAddr: DefaultLogFieldKeyAddr,
-		LogFieldKeySql:  DefaultLogFieldKeySql,
+		LogFieldKeySql: DefaultLogFieldKeySql,
 	}
 }

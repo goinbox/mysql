@@ -191,8 +191,5 @@ func (c *Client) log(logger golog.Logger, query string, args ...interface{}) {
 	logger.Info("run sql", &golog.Field{
 		Key:   c.config.LogFieldKeySql,
 		Value: fmt.Sprintf(query, vs...),
-	}, &golog.Field{
-		Key:   c.config.LogFieldKeyAddr,
-		Value: c.config.Addr,
 	})
 }
