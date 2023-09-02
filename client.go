@@ -171,10 +171,6 @@ func (c *Client) Rollback(ctx pcontext.Context) error {
 }
 
 func (c *Client) log(logger golog.Logger, query string, args ...interface{}) {
-	if logger == nil {
-		return
-	}
-
 	query = strings.Replace(query, "?", "%s", -1)
 	vs := make([]interface{}, len(args))
 
