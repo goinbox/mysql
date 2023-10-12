@@ -25,7 +25,7 @@ type tableDemoRowItem struct {
 func init() {
 	w, _ := golog.NewFileWriter("/dev/stdout", 0)
 	logger := golog.NewSimpleLogger(w, golog.NewSimpleFormater())
-	ctx = pcontext.NewSimpleContext(logger, nil)
+	ctx = pcontext.NewSimpleContext(nil, logger)
 
 	config := NewDefaultConfig("root", "123", "127.0.0.1", "gobox-demo", 3306)
 	client, _ = NewClient(config)
