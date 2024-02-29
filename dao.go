@@ -78,7 +78,7 @@ func (d *Dao) SimpleQueryAnd(ctx pcontext.Context, tableName string, what string
 
 func (d *Dao) SimpleTotalAnd(ctx pcontext.Context, tableName string, condItems ...*SqlColQueryItem) (int64, error) {
 	sqb := new(SqlQueryBuilder)
-	sqb.Select("count(1)", tableName).
+	sqb.Select("count(*)", tableName).
 		WhereConditionAnd(condItems...)
 
 	var total int64
