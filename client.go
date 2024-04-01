@@ -97,7 +97,7 @@ func (c *Client) Exec(ctx pcontext.Context, query string, args ...interface{}) (
 	c.log(ctx.Logger(), query, args...)
 
 	if c.tx != nil {
-		return c.tx.Exec(query, args...)
+		return c.tx.ExecContext(ctx, query, args...)
 	}
 	return c.db.ExecContext(ctx, query, args...)
 }
@@ -109,7 +109,7 @@ func (c *Client) Query(ctx pcontext.Context, query string, args ...interface{}) 
 	c.log(ctx.Logger(), query, args...)
 
 	if c.tx != nil {
-		return c.tx.Query(query, args...)
+		return c.tx.QueryContext(ctx, query, args...)
 	}
 	return c.db.QueryContext(ctx, query, args...)
 }
@@ -121,7 +121,7 @@ func (c *Client) QueryRow(ctx pcontext.Context, query string, args ...interface{
 	c.log(ctx.Logger(), query, args...)
 
 	if c.tx != nil {
-		return c.tx.QueryRow(query, args...)
+		return c.tx.QueryRowContext(ctx, query, args...)
 	}
 	return c.db.QueryRowContext(ctx, query, args...)
 }
