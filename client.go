@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/goinbox/golog"
 	"github.com/goinbox/pcontext"
@@ -35,7 +34,6 @@ func RegisterDB(key string, config *Config) error {
 		return nil
 	}
 
-	db.SetConnMaxLifetime(time.Second * 30)
 	dbPool[key] = &dbItem{
 		config: config,
 		db:     db,
