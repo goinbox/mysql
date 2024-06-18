@@ -141,6 +141,7 @@ func ReflectEntityScanDests(rev reflect.Value) []interface{} {
 func ReflectQueryRowsToEntities(rows *sql.Rows, ret reflect.Type, entitiesPtr interface{}) error {
 	rlistv := reflect.ValueOf(entitiesPtr).Elem()
 
+	defer rows.Close()
 	for rows.Next() {
 		rev := reflect.New(ret)
 		dests := ReflectEntityScanDests(rev.Elem())
