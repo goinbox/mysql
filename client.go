@@ -31,7 +31,7 @@ func newDB(config *Config) (*sql.DB, error) {
 func RegisterDB(key string, config *Config) error {
 	db, err := newDB(config)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	dbPool[key] = &dbItem{
