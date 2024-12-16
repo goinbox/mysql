@@ -27,7 +27,7 @@ func init() {
 	logger := golog.NewSimpleLogger(w, golog.NewSimpleFormater())
 	ctx = pcontext.NewSimpleContext(nil, logger)
 
-	config := NewDefaultConfig("root", "123", "127.0.0.1", "gobox-demo", 3306)
+	config := NewDefaultConfig("root", "123", "172.17.0.1", "gobox-demo", 3306)
 	client, _ = NewClient(config)
 	client.SetPrepareQuery(func(query string, args ...interface{}) (string, []interface{}) {
 		query = fmt.Sprintf("/*prepare query*/ %s", query)

@@ -16,8 +16,8 @@ func TestDaoRead(t *testing.T) {
 	entity := new(demoEntity)
 
 	row := dao.SelectByID(ctx, SQL_TEST_TABLE_NAME, "*", 1)
-	_ = row.Scan(&entity.ID, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
-	t.Log(entity)
+	err := row.Scan(&entity.ID, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
+	t.Log(err, entity)
 
 	condItems := []*SqlColQueryItem{
 		{"name", SqlCondLike, "%a%", false},
@@ -38,6 +38,10 @@ func TestDaoRead(t *testing.T) {
 
 	total, _ := dao.SimpleTotalAnd(ctx, SQL_TEST_TABLE_NAME, condItems...)
 	t.Log(total)
+
+	row = dao.SimpleQueryOneAnd(ctx, SQL_TEST_TABLE_NAME, "*", condItems...)
+	err = row.Scan(&entity.ID, &entity.AddTime, &entity.EditTime, &entity.Name, &entity.Status)
+	t.Log(err, entity)
 }
 
 func TestDaoWrite(t *testing.T) {

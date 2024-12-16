@@ -32,30 +32,53 @@ func (d *Dao) Insert(ctx pcontext.Context, tableName string, colNames []string, 
 	return ConvertSqlResultToSqlExecResult(d.Exec(ctx, sqb.Query(), sqb.Args()...))
 }
 
-func (d *Dao) DeleteByIDs(ctx pcontext.Context, tableName string, ids ...int64) *SqlExecResult {
+func (d *Dao) queryItemForIDs(ids ...int64) *SqlColQueryItem {
+	condItem := &SqlColQueryItem{
+		Name:      "id",
+		Condition: "",
+		Value:     nil,
+		NoBind:    false,
+	}
+	if len(ids) == 1 {
+		condItem.Condition = SqlCondEqual
+		condItem.Value = ids[0]
+	} else {
+		condItem.Condition = SqlCondIn
+		condItem.Value = ids
+	}
+
+	return condItem
+}
+
+func (d *Dao) DeleteByQueryAnd(ctx pcontext.Context,
+	tableName string, condItems ...*SqlColQueryItem) *SqlExecResult {
 	sqb := new(SqlQueryBuilder)
 
-	sqb.Delete(tableName)
-	if len(ids) == 1 {
-		sqb.WhereConditionAnd(&SqlColQueryItem{"id", SqlCondEqual, ids[0], false})
-	} else {
-		sqb.WhereConditionAnd(&SqlColQueryItem{"id", SqlCondIn, ids, false})
-	}
+	sqb.Delete(tableName).WhereConditionAnd(condItems...)
 
 	return ConvertSqlResultToSqlExecResult(d.Exec(ctx, sqb.Query(), sqb.Args()...))
 }
 
-func (d *Dao) UpdateByIDs(ctx pcontext.Context, tableName string, updateColumns []*SqlUpdateColumn, ids ...int64) *SqlExecResult {
+func (d *Dao) DeleteByIDs(ctx pcontext.Context, tableName string, ids ...int64) *SqlExecResult {
+	condItem := d.queryItemForIDs(ids...)
+
+	return d.DeleteByQueryAnd(ctx, tableName, condItem)
+}
+
+func (d *Dao) UpdateByQueryAnd(ctx pcontext.Context,
+	tableName string, updateColumns []*SqlUpdateColumn, condItems ...*SqlColQueryItem) *SqlExecResult {
 	sqb := new(SqlQueryBuilder)
 
-	sqb.Update(tableName).Set(updateColumns)
-	if len(ids) == 1 {
-		sqb.WhereConditionAnd(&SqlColQueryItem{"id", SqlCondEqual, ids[0], false})
-	} else {
-		sqb.WhereConditionAnd(&SqlColQueryItem{"id", SqlCondIn, ids, false})
-	}
+	sqb.Update(tableName).Set(updateColumns).WhereConditionAnd(condItems...)
 
 	return ConvertSqlResultToSqlExecResult(d.Exec(ctx, sqb.Query(), sqb.Args()...))
+}
+
+func (d *Dao) UpdateByIDs(ctx pcontext.Context,
+	tableName string, updateColumns []*SqlUpdateColumn, ids ...int64) *SqlExecResult {
+	condItem := d.queryItemForIDs(ids...)
+
+	return d.UpdateByQueryAnd(ctx, tableName, updateColumns, condItem)
 }
 
 func (d *Dao) SelectByID(ctx pcontext.Context, tableName string, what string, id int64) *sql.Row {
@@ -66,7 +89,17 @@ func (d *Dao) SelectByID(ctx pcontext.Context, tableName string, what string, id
 	return d.QueryRow(ctx, sqb.Query(), sqb.Args()...)
 }
 
-func (d *Dao) SimpleQueryAnd(ctx pcontext.Context, tableName string, what string, params *SqlQueryParams) (*sql.Rows, error) {
+func (d *Dao) SimpleQueryOneAnd(ctx pcontext.Context,
+	tableName string, what string, condItems ...*SqlColQueryItem) *sql.Row {
+	sqb := new(SqlQueryBuilder)
+	sqb.Select(what, tableName).
+		WhereConditionAnd(condItems...)
+
+	return d.QueryRow(ctx, sqb.Query(), sqb.Args()...)
+}
+
+func (d *Dao) SimpleQueryAnd(ctx pcontext.Context,
+	tableName string, what string, params *SqlQueryParams) (*sql.Rows, error) {
 	sqb := new(SqlQueryBuilder)
 	sqb.Select(what, tableName).
 		WhereConditionAnd(params.CondItems...).

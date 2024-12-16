@@ -40,6 +40,18 @@ func TestSelectEntityByID(t *testing.T) {
 	}
 }
 
+func TestSimpleQueryEntityAnd(t *testing.T) {
+	entity := new(demoEntity)
+	condItems := []*SqlColQueryItem{
+		{"name", SqlCondEqual, "demo", false},
+	}
+	err := entityDao().SimpleQueryEntityAnd(ctx, "demo", entity, condItems...)
+	t.Log(err, NoRowsError(err))
+	if err == nil {
+		t.Log(*entity.ID, *entity.AddTime, *entity.EditTime, entity)
+	}
+}
+
 func TestSimpleQueryEntitiesAnd(t *testing.T) {
 	var entityList []*demoEntity
 	condItems := []*SqlColQueryItem{

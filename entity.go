@@ -177,7 +177,17 @@ func (d *EntityDao) SelectEntityByID(ctx pcontext.Context, tableName string, id 
 	return row.Scan(dests...)
 }
 
-func (d *EntityDao) SimpleQueryEntitiesAnd(ctx pcontext.Context, tableName string, params *SqlQueryParams, entitiesPtr interface{}) error {
+func (d *EntityDao) SimpleQueryEntityAnd(ctx pcontext.Context,
+	tableName string, entity interface{}, condItems ...*SqlColQueryItem) error {
+	colNames := ReflectColNamesByValue(reflect.ValueOf(entity).Elem(), false)
+	row := d.SimpleQueryOneAnd(ctx, tableName, strings.Join(colNames, ","), condItems...)
+	dests := ReflectEntityScanDests(reflect.ValueOf(entity).Elem())
+
+	return row.Scan(dests...)
+}
+
+func (d *EntityDao) SimpleQueryEntitiesAnd(ctx pcontext.Context,
+	tableName string, params *SqlQueryParams, entitiesPtr interface{}) error {
 	ret := reflect.TypeOf(entitiesPtr).Elem().Elem().Elem()
 	colNames := ReflectColNamesByType(ret)
 	rows, err := d.SimpleQueryAnd(ctx, tableName, strings.Join(colNames, ","), params)
